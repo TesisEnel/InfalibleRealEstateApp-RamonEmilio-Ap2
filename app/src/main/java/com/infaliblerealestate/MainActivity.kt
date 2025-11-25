@@ -4,14 +4,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
+import androidx.compose.material3.*
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.infaliblerealestate.presentation.navigation.AppNavHost
+import com.infaliblerealestate.presentation.util.navigation.AppBottomBar
+import com.infaliblerealestate.presentation.util.navigation.AppNavHost
+import com.infaliblerealestate.presentation.util.navigation.Screen
 import com.infaliblerealestate.ui.theme.InfalibleRealEstateTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,17 +26,42 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            InfalibleRealEstateTheme() {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+            InfalibleRealEstateTheme {
+                val navController = rememberNavController()
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                val showBottomBar = when {
+                    currentRoute?.startsWith("home_screen") == true -> true
+                    currentRoute?.startsWith("settings_screen") == true -> true
+                    currentRoute?.startsWith("carrito_screen") == true -> true
+                    currentRoute?.startsWith("catalogo_screen") == true -> true
+                    else -> false
+                }
+
+                Box(
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    val navControler = rememberNavController()
-                    Scaffold {innerpadding ->
-                        AppNavHost(
-                            navController = navControler,
-                            modifier = Modifier.padding(innerpadding)
-                        )
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        AppNavHost(navController = navController, modifier = Modifier)
+                    }
+
+                    if (showBottomBar) {
+                        val usuarioId = navBackStackEntry?.arguments?.getInt(Screen.Home.ARG) ?: 0
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(horizontal = 16.dp, vertical = 16.dp)
+                        ) {
+                            AppBottomBar(
+                                navController = navController,
+                                currentRoute = currentRoute,
+                                usuarioId = usuarioId
+                            )
+                        }
                     }
                 }
             }
