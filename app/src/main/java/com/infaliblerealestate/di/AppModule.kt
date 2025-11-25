@@ -1,6 +1,7 @@
 package com.infaliblerealestate.di
 
-import com.infaliblerealestate.data.remote.UsuariosApiService
+import com.infaliblerealestate.data.remote.Propiedades.PropiedadesApiService
+import com.infaliblerealestate.data.remote.Usuarios.UsuariosApiService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -37,7 +38,7 @@ object AppModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit =
         Retrofit.Builder()
-            .baseUrl("https://gestionhuacalesapi.azurewebsites.net/")
+            .baseUrl("https://infaliblerealestateapi.up.railway.app/")
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
@@ -46,5 +47,11 @@ object AppModule {
     @Singleton
     fun provideJugadorApiService(retrofit: Retrofit): UsuariosApiService {
         return retrofit.create(UsuariosApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun prividePropiedadesApiService(retrofit: Retrofit): PropiedadesApiService {
+        return retrofit.create(PropiedadesApiService::class.java)
     }
 }
