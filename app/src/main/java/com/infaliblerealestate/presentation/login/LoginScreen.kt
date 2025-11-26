@@ -1,45 +1,32 @@
 package com.infaliblerealestate.presentation.login
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.infaliblerealestate.presentation.navigation.Screen
-import com.infaliblerealestate.ui.theme.InfalibleRealEstateTheme
-import kotlinx.coroutines.flow.collectLatest
-
+import com.infaliblerealestate.presentation.util.navigation.Screen
 
 @Composable
 fun LoginScreen(
@@ -48,18 +35,17 @@ fun LoginScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        viewModel.effects.collectLatest { effect ->
-            when (effect) {
-                is LoginEffect.NavigateHome ->
-                    navController.navigate(Screen.Home.createRoute(effect.usuarioId))
+    LaunchedEffect(state.id) {
+        state.id?.let { userId ->
+            navController.navigate(Screen.Home.createRoute(userId)) {
+                popUpTo(Screen.Login.route) { inclusive = true }
             }
         }
     }
 
     LoginBody(
         state = state,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
     )
 }
 
@@ -67,30 +53,27 @@ fun LoginScreen(
 @Composable
 fun LoginBody(
     state: LoginUiState,
-    onEvent: (LoginUiEvent) -> Unit
+    onEvent: (LoginUiEvent) -> Unit,
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
+    var passwordVisible by remember { mutableStateOf(false) }
+    val uriHandler = LocalUriHandler.current
 
     LaunchedEffect(state.userMessage) {
         if (state.userMessage.isNotBlank()) {
             snackBarHostState.showSnackbar(state.userMessage)
-            onEvent(LoginUiEvent.userMessageShown)
+            onEvent(LoginUiEvent.UserMessageShown)
         }
     }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(
-                    text = if (state.isRegistering && !state.isLoading) "Sign in" else if(!state.isRegistering && !state.isLoading) "Log in" else "",
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.titleLarge,
-                ) }
+        snackbarHost = {
+            SnackbarHost(
+                snackBarHostState,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
-        },
-        snackbarHost = { SnackbarHost(snackBarHostState) }
+        }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -101,87 +84,164 @@ fun LoginBody(
                 CircularWavyProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
-
             } else {
                 val scroll = rememberScrollState()
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp)
-                        .navigationBarsPadding()
-                        .imePadding()
+                        .padding(24.dp)
                         .verticalScroll(scroll),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(80.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Logo",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.padding(20.dp)
+                        )
+                    }
 
-                    OutlinedTextField(
-                        value = state.userName,
-                        onValueChange = { onEvent(LoginUiEvent.userNameChanged(it)) },
-                        label = { Text("Name") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        isError = state.userNameError != null,
-                        supportingText = {
-                            state.userNameError?.let { Text(text = it) }
-                        }
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text(
+                        text = "¡Bienvenido!",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Inicia sesión y encuentra la propiedad de tus sueños",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    OutlinedTextField(
+                        value = state.email,
+                        onValueChange = { onEvent(LoginUiEvent.EmailChanged(it)) },
+                        label = { Text("Email") },
+                        placeholder = { Text("usuario@gmail.com") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Email"
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        isError = state.emailError != null,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
                         value = state.password,
-                        onValueChange = { onEvent(LoginUiEvent.passwordChanged(it)) },
+                        onValueChange = { onEvent(LoginUiEvent.PasswordChanged(it)) },
                         label = { Text("Password") },
+                        placeholder = { Text("Ingrese su contraseña") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Password"
+                            )
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(
+                                    imageVector = if (passwordVisible)
+                                        Icons.Default.Visibility
+                                    else
+                                        Icons.Default.VisibilityOff,
+                                    contentDescription = if (passwordVisible)
+                                        "Ocultar contraseña"
+                                    else
+                                        "Mostrar contraseña"
+                                )
+                            }
+                        },
+                        visualTransformation = if (passwordVisible)
+                            VisualTransformation.None
+                        else
+                            PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         isError = state.passwordError != null,
-                        supportingText = {
-                            state.passwordError?.let { Text(text = it) }
-                        }
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        )
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "¿Olvidaste la contraseña?",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .clickable {
+                                uriHandler.openUri("https://infaliblerealestate.com/Account/ForgotPassword")
+                            },
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
 
                     Button(
-                        onClick = {
-                            if (state.isRegistering) {
-                                onEvent(LoginUiEvent.submitRegistration)
-                            } else {
-                                onEvent(LoginUiEvent.submitLogin)
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
+                        onClick = { onEvent(LoginUiEvent.SubmitLogin) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(text = if (state.isRegistering) "Registrar" else "Iniciar Sesion")
+                        Text(
+                            text = "Iniciar Sesión",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = if (state.isRegistering) "Ya tienes una cuenta?" else "No tienes una cuenta?",
-                        modifier = Modifier
-                            .clickable { onEvent(LoginUiEvent.registerModeClicked) }
-                            .padding(8.dp),
-                        textAlign = TextAlign.Center
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "¿No tienes una cuenta? ",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Registrate",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable {
+                                uriHandler.openUri("https://infaliblerealestate.com/Account/Register?ReturnUrl=%2Fperfil")
+                            },
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun LoginBodyPreview(){
-    InfalibleRealEstateTheme {
-        LoginBody(
-            state = LoginUiState(
-                userName = "test",
-                password = "test",
-                isRegistering = false,
-                isLoading = false,
-            ),
-            onEvent = {}
-        )
     }
 }
