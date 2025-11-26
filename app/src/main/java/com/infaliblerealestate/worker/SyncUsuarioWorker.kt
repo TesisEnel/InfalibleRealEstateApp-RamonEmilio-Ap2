@@ -27,8 +27,6 @@ class SyncUsuarioWorker @AssistedInject constructor(
         return try {
             val usuarioId = inputData.getString(USUARIO_ID_KEY) ?: return Result.failure()
 
-            Log.d("SyncWorker", "Iniciando sincronización para usuario: $usuarioId")
-
             when (val result = repository.syncUsuario(usuarioId)) {
                 is Resource.Success -> {
                     Log.d("SyncWorker", "Sincronización exitosa")
@@ -41,7 +39,6 @@ class SyncUsuarioWorker @AssistedInject constructor(
                 else -> Result.failure()
             }
         } catch (e: Exception) {
-            Log.e("SyncWorker", "Error en sincronización", e)
             Result.retry()
         }
     }
