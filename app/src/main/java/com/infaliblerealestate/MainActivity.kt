@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     if (showBottomBar) {
-                        val usuarioId = navBackStackEntry?.arguments?.getInt(Screen.Home.ARG) ?: 0
+                        val usuarioId = navBackStackEntry?.arguments?.getString(Screen.Home.ARG) ?: ""
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
