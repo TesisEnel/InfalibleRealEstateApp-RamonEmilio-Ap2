@@ -1,7 +1,8 @@
 package com.infaliblerealestate.di
 
-import com.infaliblerealestate.data.remote.Propiedades.PropiedadesApiService
-import com.infaliblerealestate.data.remote.Usuarios.UsuariosApiService
+import com.infaliblerealestate.data.remote.carrito.CarritoApiService
+import com.infaliblerealestate.data.remote.propiedades.PropiedadesApiService
+import com.infaliblerealestate.data.remote.usuarios.UsuariosApiService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -54,4 +55,11 @@ object AppModule {
     fun prividePropiedadesApiService(retrofit: Retrofit): PropiedadesApiService {
         return retrofit.create(PropiedadesApiService::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun privideCarritoApiService(retrofit: Retrofit): CarritoApiService {
+        return retrofit.create(CarritoApiService::class.java)
+    }
+
 }
