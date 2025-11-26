@@ -1,12 +1,17 @@
 package com.infaliblerealestate.dominio.repository
 
 import com.infaliblerealestate.data.remote.Resource
-import com.infaliblerealestate.dominio.model.Usuarios
+import com.infaliblerealestate.dominio.model.Login
+import com.infaliblerealestate.dominio.model.Usuario
 import kotlinx.coroutines.flow.Flow
 
 interface UsuarioRepository {
-    suspend fun getUsuarios(): Flow<List<Usuarios>>
-    suspend fun getUsuario(id: Int): Resource<Usuarios?>
-    suspend fun putUsuario(id: Int, usuario: Usuarios): Resource<Unit>
-    suspend fun postUsuario(usuario: Usuarios): Resource<Usuarios?>
+    suspend fun validarCredenciales(credenciales: Login): Resource<Usuario?>
+    suspend fun getUsuario(id: Int): Resource<Usuario?>
+    suspend fun putUsuario(id: Int, usuario: Usuario): Resource<Usuario?>
+    fun getUsuarioActual(): Flow<Usuario?>
+    suspend fun syncUsuario(id: String): Resource<Usuario?>
+    suspend fun logout()
+    suspend fun insertUsuario(usuario: Usuario)
+
 }
