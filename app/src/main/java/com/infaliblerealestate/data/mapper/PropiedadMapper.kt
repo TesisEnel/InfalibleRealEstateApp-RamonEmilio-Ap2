@@ -33,7 +33,30 @@ fun PropiedadesDetalle.toRequest(): PropiedadesDetalleRequest = PropiedadesDetal
     metrosCuadrados = metrosCuadrados,
 )
 
+fun Propiedades.toResponse(): PropiedadesResponse = PropiedadesResponse(
+    propiedadId = propiedadId,
+    titulo = titulo,
+    precio = precio,
+    moneda = moneda,
+    ciudad = ciudad,
+    estadoProvincia = estadoProvincia,
+    tipoTransaccion = tipoTransaccion,
+    categoriaId = categoriaId,
+    fechaPublicacion = fechaPublicacion,
+    fechaActualizacion = fechaActualizacion,
+    estadoPropiedadId = estadoPropiedadId,
+    detalle = detalle.toDto(),
+    imagenes = imagenes.map { it.toResponse() }
+)
+
 fun ImagenPropiedad.toRequest(): ImagenPropiedadRequest = ImagenPropiedadRequest(
+    propiedadId = propiedadId,
+    urlImagen = urlImagen,
+    orden = orden
+)
+
+fun ImagenPropiedad.toResponse(): ImagenPropiedadResponse = ImagenPropiedadResponse(
+    imagenId = imagenId,
     propiedadId = propiedadId,
     urlImagen = urlImagen,
     orden = orden
@@ -56,6 +79,15 @@ fun PropiedadesResponse.toDomain(): Propiedades = Propiedades(
 )
 
 fun PropiedadesDetalleResponse.toDomain(): PropiedadesDetalle = PropiedadesDetalle(
+    propiedadId = propiedadId,
+    descripcion = descripcion,
+    habitaciones = habitaciones,
+    banos = banos,
+    parqueo = parqueo,
+    metrosCuadrados = metrosCuadrados,
+)
+
+fun PropiedadesDetalle.toDto(): PropiedadesDetalleResponse = PropiedadesDetalleResponse(
     propiedadId = propiedadId,
     descripcion = descripcion,
     habitaciones = habitaciones,
