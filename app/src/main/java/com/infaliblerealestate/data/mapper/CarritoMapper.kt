@@ -1,8 +1,10 @@
 package com.infaliblerealestate.data.mapper
 
+import com.infaliblerealestate.data.remote.dto.carrito.CarritoAddItemRequest
 import com.infaliblerealestate.data.remote.dto.carrito.CarritoItemResponse
 import com.infaliblerealestate.data.remote.dto.carrito.CarritoResponse
 import com.infaliblerealestate.dominio.model.Carrito
+import com.infaliblerealestate.dominio.model.CarritoAddItem
 import com.infaliblerealestate.dominio.model.CarritoItem
 
 fun Carrito.toResponse(): CarritoResponse = CarritoResponse(
@@ -29,4 +31,8 @@ fun CarritoItemResponse.toDomain(): CarritoItem = CarritoItem(
     carritoId = carritoId,
     propiedadId = propiedadId,
     propiedad = propiedad.toDomain()
+)
+
+fun CarritoAddItem.toRequest(): CarritoAddItemRequest = CarritoAddItemRequest(
+    propiedadId = propiedadId
 )
