@@ -13,6 +13,6 @@ data class UsuarioEntity(
     val apellido: String,
     val estadoUsuario: String,
     val rol: String,
-    val lastSync: Long = 0L
+    val lastSync: Long = 0L,
 )
 
