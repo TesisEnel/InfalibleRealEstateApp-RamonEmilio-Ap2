@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.compareTo
-import kotlin.text.compareTo
 
 @HiltViewModel
 class CatalogoViewModel @Inject constructor(
@@ -66,8 +64,8 @@ class CatalogoViewModel @Inject constructor(
             is CatalogoUiEvent.onFilterPenthouse -> {
                 _state.update { it.copy(filtroPenthouse = event.filter  ) }
             }
-            is CatalogoUiEvent.onFilterSolar -> {
-                _state.update { it.copy(filtroSolar = event.filter) }
+            is CatalogoUiEvent.onFilterTerreno -> {
+                _state.update { it.copy(filtroTerreno = event.filter) }
             }
             is CatalogoUiEvent.onFilterLocalComercial -> {
                 _state.update { it.copy(filtroLocalComercial = event.filter) }
@@ -145,7 +143,7 @@ class CatalogoViewModel @Inject constructor(
                     if (_state.value.filtroDepartamento) add(1)
                     if (_state.value.filtroVilla) add(5)
                     if (_state.value.filtroPenthouse) add(6)
-                    if (_state.value.filtroSolar) add(3)
+                    if (_state.value.filtroTerreno) add(3)
                     if (_state.value.filtroLocalComercial) add(4)
                 }
 
@@ -180,7 +178,7 @@ class CatalogoViewModel @Inject constructor(
                     filtroDepartamento = false,
                     filtroVilla = false,
                     filtroPenthouse = false,
-                    filtroSolar = false,
+                    filtroTerreno = false,
                     filtroLocalComercial = false,
                     filtroPrecio = 0.0f,
                     filtroHabitaciones = 0,
@@ -201,7 +199,7 @@ class CatalogoViewModel @Inject constructor(
                 "Departamento" -> _state.update { it.copy(filtroDepartamento = true) }
                 "Villa" -> _state.update { it.copy(filtroVilla = true) }
                 "Penthouse" -> _state.update { it.copy(filtroPenthouse = true) }
-                "Solar" -> _state.update { it.copy(filtroSolar = true) }
+                "Terreno" -> _state.update { it.copy(filtroTerreno = true) }
                 "Local Comercial" -> _state.update { it.copy(filtroLocalComercial = true) }
             }
             filterPropiedades()

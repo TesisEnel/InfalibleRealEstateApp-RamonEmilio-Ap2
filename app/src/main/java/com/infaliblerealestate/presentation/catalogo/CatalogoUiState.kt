@@ -15,7 +15,7 @@ data class CatalogoUiState(
     val filtroDepartamento: Boolean = false,
     val filtroVilla: Boolean = false,
     val filtroPenthouse: Boolean = false,
-    val filtroSolar: Boolean = false,
+    val filtroTerreno: Boolean = false,
     val filtroLocalComercial: Boolean = false,
     val filtroPrecio: Float = 0.0f,
     val filtroHabitaciones: Int = 0,

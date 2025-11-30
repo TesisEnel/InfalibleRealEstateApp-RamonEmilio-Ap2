@@ -1,6 +1,7 @@
 package com.infaliblerealestate.presentation.catalogo
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,7 +38,6 @@ import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Sell
@@ -49,19 +49,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import com.infaliblerealestate.dominio.model.ImagenPropiedad
 import com.infaliblerealestate.dominio.model.PropiedadesDetalle
 import com.infaliblerealestate.presentation.util.components.PropiedadItem
 import com.infaliblerealestate.presentation.util.components.PropiedadChip
 import com.infaliblerealestate.presentation.util.components.SheetPropiedadDetalle
+import com.infaliblerealestate.presentation.util.navigation.Screen
 import com.infaliblerealestate.ui.theme.InfalibleRealEstateTheme
 
 @Composable
 fun CatalogoScreen(
-    usuarioId: String?,
     categoriaInicial: String? = null,
-    viewModel: CatalogoViewModel = hiltViewModel()
+    viewModel: CatalogoViewModel = hiltViewModel(),
+    navController: NavController? = null,
 ) {
+
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snack = remember{ SnackbarHostState() }
 
@@ -72,7 +75,7 @@ fun CatalogoScreen(
         }
     }
 
-    LaunchedEffect(categoriaInicial) {
+    LaunchedEffect(key1 = categoriaInicial) {
         categoriaInicial?.let {
             viewModel.onEvent(CatalogoUiEvent.aplicarCategoriaInicial(it))
         }
@@ -81,7 +84,8 @@ fun CatalogoScreen(
     CatalogoContent(
         onEvent = viewModel::onEvent,
         snack = snack,
-        state = state
+        state = state,
+        navController = navController
     )
 }
 
@@ -90,7 +94,8 @@ fun CatalogoScreen(
 fun CatalogoContent(
     onEvent: (CatalogoUiEvent) -> Unit,
     snack: SnackbarHostState,
-    state: CatalogoUiState
+    state: CatalogoUiState,
+    navController: NavController?
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -98,6 +103,29 @@ fun CatalogoContent(
             CenterAlignedTopAppBar(
                 modifier = Modifier
                     .padding(horizontal = 16.dp),
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            navController?.navigate(
+                                Screen.UpsertPropiedad.createRoute(usuarioId = "D")
+                            )
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Agregar propiedad",
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                },
+
                 title = {
                     Text(
                         text = "Catálogo",
@@ -132,9 +160,6 @@ fun CatalogoContent(
                 modifier = Modifier.padding(bottom = 96.dp)
             )
         },
-        bottomBar ={
-            Spacer(modifier = Modifier.height(90.dp))
-        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -213,6 +238,7 @@ fun FilterDialog(
         modifier = modifier
             .fillMaxWidth()
             .padding(4.dp),
+        shape = RoundedCornerShape(16.dp),
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -233,15 +259,11 @@ fun FilterDialog(
                         modifier = Modifier.weight(1f)
                     )
 
-                    IconButton(
-                        onClick = {onEvent(CatalogoUiEvent.hideFilterDialog)},
-
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Cerrar"
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Cerrar",
+                        modifier = Modifier.clickable { onEvent(CatalogoUiEvent.hideFilterDialog) }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -280,9 +302,9 @@ fun FilterDialog(
 
                     PropiedadChip(
                         icon = Icons.Default.Map,
-                        text = "Solar",
-                        onClick = { onEvent(CatalogoUiEvent.onFilterSolar(!state.filtroSolar)) },
-                        selected = state.filtroSolar
+                        text = "Terreno",
+                        onClick = { onEvent(CatalogoUiEvent.onFilterTerreno(!state.filtroTerreno)) },
+                        selected = state.filtroTerreno
                     )
 
                     PropiedadChip(
@@ -370,8 +392,11 @@ fun FilterDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
 
                 ) {
-                    Button(
-                        onClick = { onEvent(CatalogoUiEvent.clearFilters) }
+                    OutlinedButton(
+                        onClick = { onEvent(CatalogoUiEvent.clearFilters) },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
                     ){
                         Text("Limpiar")
                     }
@@ -392,17 +417,21 @@ fun Stepper(
     modifier: Modifier = Modifier,
     text: String
 ) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Start
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.End,
         ) {
             FilledTonalIconButton(
                 onClick = {
@@ -439,6 +468,8 @@ fun Stepper(
                 )
             }
         }
+    }
+
 
 }
 
@@ -460,6 +491,7 @@ fun CatalogoContentPreview() {
                         estadoProvincia = "Duarte",
                         tipoTransaccion = "Venta",
                         categoriaId = 1,
+                        administradorId = "D",
                         fechaPublicacion = "2023-01-01",
                         fechaActualizacion = "2023-01-10",
                         estadoPropiedadId = 1,
@@ -483,7 +515,8 @@ fun CatalogoContentPreview() {
                 ),
                 showSheet = false,
                 propiedad = null
-            )
+            ),
+            navController = null
         )
     }
 }

@@ -12,7 +12,7 @@ interface CatalogoUiEvent {
     data class onFilterDepartamento(val filter: Boolean): CatalogoUiEvent
     data class onFilterVilla(val filter: Boolean): CatalogoUiEvent
     data class onFilterPenthouse(val filter: Boolean): CatalogoUiEvent
-    data class onFilterSolar(val filter: Boolean): CatalogoUiEvent
+    data class onFilterTerreno(val filter: Boolean): CatalogoUiEvent
     data class onFilterLocalComercial(val filter: Boolean): CatalogoUiEvent
     data class onFilterPrecio(val precio: Float): CatalogoUiEvent
     data class onFilterHabitaciones(val habitaciones: Int): CatalogoUiEvent
