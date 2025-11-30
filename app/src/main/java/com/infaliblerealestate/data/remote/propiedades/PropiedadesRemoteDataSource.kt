@@ -2,6 +2,8 @@ package com.infaliblerealestate.data.remote.propiedades
 
 import com.infaliblerealestate.data.remote.Resource
 import com.infaliblerealestate.data.remote.dto.propiedades.request.PropiedadesRequest
+import com.infaliblerealestate.data.remote.dto.propiedades.response.CategoriaResponse
+import com.infaliblerealestate.data.remote.dto.propiedades.response.EstadoPropiedadResponse
 import com.infaliblerealestate.data.remote.dto.propiedades.response.PropiedadesResponse
 import javax.inject.Inject
 
@@ -47,4 +49,57 @@ class PropiedadesRemoteDataSource @Inject constructor(
             Resource.Error("Error ${ex.localizedMessage}")
         }
     }
+
+    suspend fun postPropiedad(propiedad: PropiedadesRequest): Resource<PropiedadesResponse>{
+        return try{
+            val response = api.postPropiedad(propiedad)
+            if(response.isSuccessful){
+                response.body().let{Resource.Success(it)}
+            }else{
+                Resource.Error("Error ${response.code()}: ${response.message()}")
+            }
+        }catch (ex: Exception){
+            Resource.Error("Error ${ex.localizedMessage}")
+        }
+    }
+
+    suspend fun deletePropiedad(id: Int): Resource<Unit>{
+        return try{
+            val response = api.deletePropiedad(id)
+            if(response.isSuccessful){
+                Resource.Success(Unit)
+            }else{
+                Resource.Error("Error ${response.code()}: ${response.message()}")
+            }
+        }catch (ex: Exception){
+            Resource.Error("Error ${ex.localizedMessage}")
+        }
+    }
+
+    suspend fun getCategorias(): Resource<List<CategoriaResponse>>{
+        return try{
+            val response = api.getCategorias()
+            if(response.isSuccessful){
+                response.body().let { Resource.Success(it) }
+            }else{
+                Resource.Error("Error ${response.code()}: ${response.message()}")
+            }
+        }catch (ex: Exception){
+            Resource.Error("Error ${ex.localizedMessage}")
+        }
+    }
+
+    suspend fun getEstadoPropiedades(): Resource<List<EstadoPropiedadResponse>>{
+        return try{
+            val response = api.getEstadoPropiedades()
+            if(response.isSuccessful){
+                response.body().let { Resource.Success(it) }
+            }else{
+                Resource.Error("Error ${response.code()}: ${response.message()}")
+            }
+        }catch (ex: Exception){
+            Resource.Error("Error ${ex.localizedMessage}")
+        }
+    }
+
 }
