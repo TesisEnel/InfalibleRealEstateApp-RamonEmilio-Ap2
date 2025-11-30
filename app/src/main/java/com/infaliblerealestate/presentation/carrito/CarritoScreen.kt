@@ -83,9 +83,6 @@ fun CarritoContent(
                 modifier = Modifier.padding(bottom = 96.dp)
             )
         },
-        bottomBar ={
-            Spacer(modifier = Modifier.height(90.dp))
-        }
     ) { padding ->
         Surface(
             modifier = Modifier
