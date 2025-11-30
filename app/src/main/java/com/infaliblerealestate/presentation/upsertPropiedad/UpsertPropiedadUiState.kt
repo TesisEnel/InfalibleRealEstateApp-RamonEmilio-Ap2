@@ -1,0 +1,48 @@
+package com.infaliblerealestate.presentation.upsertPropiedad
+
+import com.infaliblerealestate.dominio.model.Categorias
+import com.infaliblerealestate.dominio.model.EstadoPropiedad
+import com.infaliblerealestate.dominio.model.Propiedades
+
+data class UpsertPropiedadUiState(
+    val usuarioId: String? = null,
+    val isLoading: Boolean = false,
+    val propiedadAEditar: Propiedades? = null,
+    val categorias: List<Categorias> = emptyList(),
+    val estadosPropiedades: List<EstadoPropiedad> = emptyList(),
+    val isEditing: Boolean = false,
+    val propiedadId: Int? = null,
+    val userMessage: String? = null,
+    val titulo: String = "",
+    val tituloError: String? = null,
+    val precio: Double= 0.0,
+    val precioError: String?=  null,
+    val moneda: String= "",
+    val monedaError: String? = null,
+    val ciudad: String = "",
+    val ciudadError: String? = null,
+    val estadoProvincia: String = "",
+    val estadoProvinciaError: String? = null,
+    val tipoTransaccion: String = "",
+    val tipoTransaccionError: String? = null,
+    val categoriaId: Int = 0,
+    val categoria: String = "",
+    val categoriaError: String? = null,
+    val administradorId: String = "",
+    val fechaPublicacion: String = "",
+    val fechaActualizacion: String = "",
+    val estadoPropiedadId: Int = 0,
+    val estadoPropiedad: String = "",
+    val estadoPropiedadError: String? = null,
+    val descripcion: String = "",
+    val descripcionError: String? = null,
+    val habitaciones: Int = 0,
+    val habitacionesError: String? = null,
+    val banos: Double = 0.0,
+    val banosError: String? = null,
+    val parqueo: Int = 0,
+    val parqueoError: String? = null,
+    val metrosCuadrados: Double = 0.0,
+    val metrosCuadradosError: String? = null,
+    val imagenUrls: List<String> = emptyList(),
+)
