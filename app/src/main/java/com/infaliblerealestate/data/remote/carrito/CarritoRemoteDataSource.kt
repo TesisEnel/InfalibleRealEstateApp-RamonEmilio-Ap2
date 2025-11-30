@@ -1,6 +1,7 @@
 package com.infaliblerealestate.data.remote.carrito
 
 import com.infaliblerealestate.data.remote.Resource
+import com.infaliblerealestate.data.remote.dto.carrito.CarritoAddItemRequest
 import com.infaliblerealestate.data.remote.dto.carrito.CarritoResponse
 import javax.inject.Inject
 
@@ -19,10 +20,9 @@ class CarritoRemoteDataSource @Inject constructor(
             Resource.Error("Error: ${ex.localizedMessage}")
         }
     }
-
-    suspend fun postCarrito(id: String, propiedadId: Int): Resource<Unit>{
+    suspend fun postCarrito(id: String, item: CarritoAddItemRequest): Resource<Unit>{
         return try {
-            val response = api.postCarrito(id, propiedadId)
+            val response = api.postCarrito(id, item)
             if(response.isSuccessful){
                 Resource.Success(Unit)
             }else{
