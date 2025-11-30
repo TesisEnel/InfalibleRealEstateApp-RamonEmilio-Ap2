@@ -15,8 +15,8 @@ interface UsuariosApiService {
     suspend fun validarCredenciales(@Body credenciales: LoginRequest): Response<UsuarioResponse?>
 
     @GET("api/Usuario/{id}")
-    suspend fun getUsuario(@Path("id") id : Int): Response<UsuarioResponse?>
+    suspend fun getUsuario(@Path("id") id : String): Response<UsuarioResponse?>
 
     @PUT("api/Usuario/{id}")
-    suspend fun putUsuario(@Path("id") id : Int, @Body usuario: UsuarioRequest): Response<UsuarioResponse>
+    suspend fun putUsuario(@Path("id") id : String, @Body usuario: UsuarioRequest): Response<UsuarioResponse>
 }
