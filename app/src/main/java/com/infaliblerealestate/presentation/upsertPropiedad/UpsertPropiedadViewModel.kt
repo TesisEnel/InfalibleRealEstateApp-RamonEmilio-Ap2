@@ -249,7 +249,7 @@ class UpsertPropiedadViewModel @Inject constructor(
                     }
                     else -> {
                         _state.update {
-                            it.copy(isLoading = false, userMessage = "Error al guardar la propiedad")
+                            it.copy(isLoading = false, userMessage = "Error al actualizar la propiedad")
                         }
                     }
                 }
@@ -412,7 +412,7 @@ class UpsertPropiedadViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            userMessage = "Error al guardar la propiedad",
+                            userMessage = "Error desconocido al intentar guardar la propiedad",
                         )
                     }
                 }
