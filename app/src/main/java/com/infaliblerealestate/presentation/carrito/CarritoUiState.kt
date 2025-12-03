@@ -8,9 +8,10 @@ data class CarritoUiState(
     val isLoading: Boolean = false,
     val carrito: Carrito? = null,
     val items: List<CarritoItem> = emptyList(),
-    val id: String? = null,
+    val usuarioId: String? = null,
     val userMessage: String? = null,
     val showSheet: Boolean = false,
     val propiedad: Propiedades? = null,
-    val isLoadingSheet: Boolean = false
+    val isLoadingSheet: Boolean = false,
+    val whatsappUrl: String? = null
 )
