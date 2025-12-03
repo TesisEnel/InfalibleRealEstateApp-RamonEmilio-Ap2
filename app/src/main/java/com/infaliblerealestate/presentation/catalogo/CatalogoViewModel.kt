@@ -17,9 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.compareTo
-import kotlin.text.compareTo
-import kotlin.text.get
 
 @HiltViewModel
 class CatalogoViewModel @Inject constructor(
