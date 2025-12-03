@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -241,4 +242,24 @@ fun LoginBody(
             }
         }
     }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun LoginBodyPreview() {
+    val stateDemo = LoginUiState(
+        email = "usuario@gmail.com",
+        password = "123456",
+        emailError = null,
+        passwordError = null,
+        isLoading = false,
+        userMessage = "",
+        id = null
+    )
+
+    LoginBody(
+        state = stateDemo,
+        onEvent = { _ -> }
+    )
 }

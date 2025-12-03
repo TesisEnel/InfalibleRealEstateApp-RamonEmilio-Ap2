@@ -19,9 +19,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.infaliblerealestate.dominio.model.Categorias
+import com.infaliblerealestate.dominio.model.ImagenPropiedad
+import com.infaliblerealestate.dominio.model.Propiedades
+import com.infaliblerealestate.dominio.model.PropiedadesDetalle
 import com.infaliblerealestate.presentation.util.components.PropiedadChip
 import com.infaliblerealestate.presentation.util.components.PropiedadItem
 import com.infaliblerealestate.presentation.util.components.SheetPropiedadDetalle
@@ -211,6 +216,70 @@ fun HomeScreenContent(
             onDismiss = { onEvent(HomeUiEvent.HideSheet) }
         )
     }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun HomeScreenContentPreview() {
+    val detalleDemo = PropiedadesDetalle(
+        propiedadId = 1,
+        descripcion = "Apartamento moderno y bien ubicado.",
+        habitaciones = 3,
+        banos = 2.0,
+        parqueo = 1,
+        metrosCuadrados = 95.0
+    )
+
+    val imagenesDemo = listOf(
+        ImagenPropiedad(
+            imagenId = 1,
+            propiedadId = 1,
+            urlImagen = "https://via.placeholder.com/600x400",
+            orden = 1
+        )
+    )
+
+    val propiedadDemo = Propiedades(
+        propiedadId = 1,
+        administradorId = "admin-001",
+        titulo = "Apartamento en el centro",
+        precio = 2_500_000.0,
+        moneda = "DOP",
+        ciudad = "Santo Domingo",
+        estadoProvincia = "Distrito Nacional",
+        tipoTransaccion = "Venta",
+        categoriaId = 1,
+        fechaPublicacion = "2025-01-01",
+        fechaActualizacion = "2025-01-10",
+        estadoPropiedadId = 1,
+        detalle = detalleDemo,
+        imagenes = imagenesDemo
+    )
+
+    val categoriasDemo = listOf(
+        Categorias(categoriaId = 1, nombreCategoria = "Casa", descripcion = "Casas"),
+        Categorias(categoriaId = 2, nombreCategoria = "Apartamento", descripcion = "Apartamentos"),
+        Categorias(categoriaId = 3, nombreCategoria = "Villa", descripcion = "Villas")
+    )
+
+    val stateDemo = HomeUiState(
+        isLoading = false,
+        categorias = categoriasDemo,
+        propiedades = listOf(propiedadDemo, propiedadDemo.copy(propiedadId = 2, titulo = "Villa frente al mar")),
+        showSheet = false,
+        propiedad = propiedadDemo,
+        usuarioId = "user-123",
+        isAdmin = true,
+        userMessage = null
+    )
+
+    HomeScreenContent(
+        state = stateDemo,
+        onEvent = { },
+        snack = SnackbarHostState(),
+        onNavigateToCatalogo = { },
+        onNavigateToUpsertPropiedad = { _, _, _ -> }
+    )
 }
 
 

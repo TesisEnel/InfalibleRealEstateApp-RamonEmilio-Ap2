@@ -40,7 +40,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.infaliblerealestate.dominio.model.CarritoItem
+import com.infaliblerealestate.dominio.model.ImagenPropiedad
+import com.infaliblerealestate.dominio.model.Propiedades
+import com.infaliblerealestate.dominio.model.PropiedadesDetalle
 import com.infaliblerealestate.presentation.util.components.CarritoItem
 import com.infaliblerealestate.presentation.util.components.SheetPropiedadDetalle
 import com.infaliblerealestate.presentation.util.components.ThemedSnackbarHost
@@ -224,4 +229,66 @@ fun CarritoContent(
             onDismiss = { onEvent(CarritoUiEvent.HideSheet) }
         )
     }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun CarritoContentPreview() {
+    val detalleDemo = PropiedadesDetalle(
+        propiedadId = 1,
+        descripcion = "Apartamento moderno y bien ubicado.",
+        habitaciones = 3,
+        banos = 2.0,
+        parqueo = 1,
+        metrosCuadrados = 95.0
+    )
+
+    val imagenesDemo = listOf(
+        ImagenPropiedad(
+            imagenId = 1,
+            propiedadId = 1,
+            urlImagen = "https://via.placeholder.com/600x400",
+            orden = 1
+        )
+    )
+
+    val propiedadDemo = Propiedades(
+        propiedadId = 1,
+        administradorId = "admin-001",
+        titulo = "Apartamento en el centro",
+        precio = 2_500_000.0,
+        moneda = "DOP",
+        ciudad = "Santo Domingo",
+        estadoProvincia = "Distrito Nacional",
+        tipoTransaccion = "Venta",
+        categoriaId = 1,
+        fechaPublicacion = "2025-01-01",
+        fechaActualizacion = "2025-01-10",
+        estadoPropiedadId = 1,
+        detalle = detalleDemo,
+        imagenes = imagenesDemo
+    )
+
+    val stateDemo = CarritoUiState(
+        usuarioId = "user-123",
+        isLoading = false,
+        items = listOf(
+            CarritoItem(
+                carritoId = 1,
+                carritoItemId = 23,
+                propiedadId = propiedadDemo.propiedadId,
+                propiedad = propiedadDemo
+            )
+        ),
+        showSheet = false,
+        propiedad = propiedadDemo,
+        userMessage = null,
+        whatsappUrl = null
+    )
+
+    CarritoContent(
+        state = stateDemo,
+        snack = SnackbarHostState(),
+        onEvent = {}
+    )
 }

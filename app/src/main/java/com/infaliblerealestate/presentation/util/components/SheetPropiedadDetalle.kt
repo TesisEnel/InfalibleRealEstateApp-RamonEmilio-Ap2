@@ -35,9 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.infaliblerealestate.dominio.model.ImagenPropiedad
 import com.infaliblerealestate.dominio.model.Propiedades
+import com.infaliblerealestate.dominio.model.PropiedadesDetalle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -199,4 +202,55 @@ fun SheetPropiedadDetalle(
             }
         }
     }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SheetPropiedadDetallePreview() {
+    val detalleDemo = PropiedadesDetalle(
+        propiedadId = 1,
+        descripcion = "Amplio apartamento moderno en el centro de la ciudad, cerca de todo.",
+        habitaciones = 3,
+        banos = 2.0,
+        parqueo = 2,
+        metrosCuadrados = 120.0
+    )
+
+    val imagenesDemo = listOf(
+        ImagenPropiedad(
+            imagenId = 1,
+            propiedadId = 1,
+            urlImagen = "https://via.placeholder.com/800x600",
+            orden = 1
+        ),
+        ImagenPropiedad(
+            imagenId = 2,
+            propiedadId = 1,
+            urlImagen = "https://via.placeholder.com/800x600?2",
+            orden = 2
+        )
+    )
+
+    val propiedadDemo = Propiedades(
+        propiedadId = 1,
+        administradorId = "admin-001",
+        titulo = "Apartamento moderno en el centro",
+        precio = 1_250_000.0,
+        moneda = "Peso",
+        ciudad = "Santo Domingo",
+        estadoProvincia = "Distrito Nacional",
+        tipoTransaccion = "Venta",
+        categoriaId = 1,
+        fechaPublicacion = "2025-01-01",
+        fechaActualizacion = "2025-01-10",
+        estadoPropiedadId = 1,
+        detalle = detalleDemo,
+        imagenes = imagenesDemo
+    )
+
+    SheetPropiedadDetalle(
+        propiedad = propiedadDemo,
+        onDismiss = {}
+    )
 }
