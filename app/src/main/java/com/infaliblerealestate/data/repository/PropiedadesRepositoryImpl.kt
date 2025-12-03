@@ -7,9 +7,11 @@ import com.infaliblerealestate.data.remote.Resource
 import com.infaliblerealestate.dominio.model.Categorias
 import com.infaliblerealestate.dominio.model.EstadoPropiedad
 import com.infaliblerealestate.dominio.model.Propiedades
+import com.infaliblerealestate.dominio.model.Ubicacion
 import com.infaliblerealestate.dominio.repository.PropiedadesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.MultipartBody
 import javax.inject.Inject
 
 class PropiedadesRepositoryImpl @Inject constructor(
@@ -109,4 +111,48 @@ class PropiedadesRepositoryImpl @Inject constructor(
             else -> {emit(emptyList())}
         }
     }
+
+    override suspend fun uploadImages(propiedadId: Int, images: List<MultipartBody.Part>): Resource<Unit> {
+        when(val result = remoteDataSource.uploadImages(propiedadId, images)){
+            is Resource.Success -> {
+                return Resource.Success(Unit)
+            }
+            is Resource.Error -> {
+                return Resource.Error(result.message ?: "Error")
+            }
+            else -> {
+                return Resource.Error("Error al subir las imágenes")
+            }
+        }
+    }
+
+    override suspend fun deleteImages(imagenesIds: List<Int>): Resource<Unit> {
+        when(val result = remoteDataSource.deleteImages(imagenesIds)){
+            is Resource.Success -> {
+                return Resource.Success(Unit)
+            }
+            is Resource.Error -> {
+                return Resource.Error(result.message ?: "Error")
+            }
+            else -> {
+                return Resource.Error("Error al eliminar las imágenes")
+            }
+        }
+    }
+
+    override suspend fun getUbicaciones(): Resource<Ubicacion> {
+        when(val result = remoteDataSource.getUbicaciones()){
+            is Resource.Success -> {
+                val ubicacion = result.data
+                return Resource.Success(ubicacion?.toDomain())
+            }
+            is Resource.Error -> {
+                return Resource.Error(result.message ?: "Error")
+            }
+            else -> {
+                return Resource.Error("Error al obtener las ubicaciones")
+            }
+        }
+    }
+
 }
