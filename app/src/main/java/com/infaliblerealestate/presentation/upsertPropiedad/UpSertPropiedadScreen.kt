@@ -131,49 +131,14 @@ fun UpsertPropiedadContent(
     onImagePickerClick: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    var tipoTransaccionExpanded by remember { mutableStateOf(false) }
-    var categoriaExpanded by remember { mutableStateOf(false) }
-    var monedaExpanded by remember { mutableStateOf(false) }
-    var estadoExpanded by remember { mutableStateOf(false) }
-    var ciudadExpanded by remember { mutableStateOf(false) }
-    var provinciaExpanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
-
-
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                navigationIcon = {
-                    IconButton(
-                        onClick = onNavigateBack,
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .size(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBackIosNew,
-                            contentDescription = "Volver",
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    }
-                },
-                title = {
-                    Text(
-                        text = if (state.isEditing) "Editar Propiedad" else "Nueva Propiedad",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
+            UpsertPropiedadTopBar(
+                isEditing = state.isEditing,
+                onNavigateBack = onNavigateBack
             )
         },
         snackbarHost = {
@@ -182,9 +147,7 @@ fun UpsertPropiedadContent(
                 modifier = Modifier.padding(bottom = 96.dp)
             )
         }
-
     ) { paddingValues ->
-
         Column(
             modifier = Modifier
                 .padding(paddingValues)
@@ -194,475 +157,596 @@ fun UpsertPropiedadContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            if(state.isLoading){
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(170.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularWavyProgressIndicator()
-                }
-            }else{
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(170.dp)
-                        .padding(vertical = 8.dp)
-                        .drawBehind {
-                            val stroke = Stroke(width = 2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
-                            val radius = 12.dp.toPx()
-                            drawRoundRect(
-                                color = Color(0xFFAFBED0),
-                                style = stroke,
-                                cornerRadius = CornerRadius(radius, radius)
-                            )
-                        }
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.Transparent)
-                        .clickable { onImagePickerClick() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AddToPhotos,
-                            contentDescription = "Subir imagenes",
-                            tint = MaterialTheme.colorScheme.outline,
-                            modifier = Modifier.size(35.dp)
-                        )
-
-
-                        Text(
-                            text = "Subir imágenes",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.outline,
-                            fontWeight = FontWeight.Medium
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                    }
-                }
-
-                ImageGallerySection(
-                    imagenesCargadas = state.imagenesCargadas,
-                    selectedImages = state.selectedImages,
-                    onDeleteServerImage = {onEvent(UpsertPropiedadUiEvent.OnDeleteServerImage(it))},
-                    onDeleteSelectedImage = { uri ->
-                        onEvent(UpsertPropiedadUiEvent.OnDeleteSelectedImage(uri))
-                    }
+            if (state.isLoading) {
+                LoadingSection()
+            } else {
+                UpsertPropiedadForm(
+                    state = state,
+                    onEvent = onEvent,
+                    onImagePickerClick = onImagePickerClick
                 )
-
-                OutlinedTextField(
-                    value = state.titulo,
-                    onValueChange = { onEvent(UpsertPropiedadUiEvent.OnTituloChanged(it)) },
-                    label = { Text("Título") },
-                    placeholder = { Text("Ingrese el título de la propiedad") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    isError = state.tituloError != null,
-                    supportingText = {
-                        if(state.tituloError != null){
-                            Text(text = state.tituloError , color = MaterialTheme.colorScheme.error)
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                ExposedDropdownMenuBox(
-                    expanded = tipoTransaccionExpanded,
-                    onExpandedChange = { tipoTransaccionExpanded = !tipoTransaccionExpanded }
-                ) {
-                    OutlinedTextField(
-                        value = state.tipoTransaccion,
-                        onValueChange = { onEvent(UpsertPropiedadUiEvent.OnTipoTransaccionChanged(it)) },
-                        readOnly = true,
-                        label = { Text("Tipo de Transacción") },
-                        shape = RoundedCornerShape(8.dp),
-                        trailingIcon = {
-                            Icon(if(tipoTransaccionExpanded)Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown, contentDescription = "Opciones de tipo de transacción")
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        isError = state.tipoTransaccionError != null,
-                        supportingText = {
-                            if(state.tipoTransaccionError != null){
-                                Text(text = state.tipoTransaccionError , color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    )
-                    ExposedDropdownMenu(
-                        expanded = tipoTransaccionExpanded,
-                        onDismissRequest = { tipoTransaccionExpanded = false }
-                    ) {
-                        listOf("Venta", "Alquiler").forEach { tipoTransaccion ->
-                            DropdownMenuItem(
-                                text = { Text(tipoTransaccion) },
-                                onClick = {
-                                    onEvent(UpsertPropiedadUiEvent.OnTipoTransaccionChanged(tipoTransaccion))
-                                    tipoTransaccionExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                ExposedDropdownMenuBox(
-                    expanded = categoriaExpanded,
-                    onExpandedChange = { categoriaExpanded = !categoriaExpanded }
-                ) {
-                    OutlinedTextField(
-                        value = state.categoria,
-                        onValueChange = { },
-                        readOnly = true,
-                        label = { Text("Tipo de Propiedad") },
-                        shape = RoundedCornerShape(8.dp),
-                        trailingIcon = {
-                            Icon(if(categoriaExpanded)Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown, contentDescription = "Opciones de categoria")
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        isError = state.categoriaError != null,
-                        supportingText = {
-                            if(state.categoriaError != null){
-                                Text(text = state.categoriaError , color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    )
-                    ExposedDropdownMenu(
-                        expanded = categoriaExpanded,
-                        onDismissRequest = { categoriaExpanded = false }
-                    ) {
-                        state.categorias.forEach { categoria ->
-                            DropdownMenuItem(
-                                text = { Text(categoria.nombreCategoria.toString()) },
-                                onClick = {
-                                    onEvent(UpsertPropiedadUiEvent.OnCategoriaIdChanged(categoria.categoriaId, categoria.nombreCategoria ?: ""))
-                                    categoriaExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ExposedDropdownMenuBox(
-                        expanded = monedaExpanded,
-                        modifier = Modifier.weight(1f),
-                        onExpandedChange = { monedaExpanded = !monedaExpanded }
-                    ) {
-                        OutlinedTextField(
-                            value = state.moneda,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Moneda") },
-                            shape = RoundedCornerShape(8.dp),
-                            trailingIcon = {
-                                Icon(if(monedaExpanded)Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown, contentDescription = "Opciones de moneda")
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(),
-                            isError = state.monedaError != null,
-                            supportingText = {
-                                if(state.monedaError != null){
-                                    Text(text = state.monedaError , color = MaterialTheme.colorScheme.error)
-                                }
-                            }
-                        )
-                        ExposedDropdownMenu(
-                            expanded = monedaExpanded,
-                            onDismissRequest = { monedaExpanded = false }
-                        ) {
-                            listOf("Peso", "Dolar").forEach { moneda ->
-                                DropdownMenuItem(
-                                    text = { Text(moneda) },
-                                    onClick = {
-                                        onEvent(UpsertPropiedadUiEvent.OnMonedaChanged(moneda))
-                                        monedaExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    OutlinedTextField(
-                        value = state.precio.toString(),
-                        onValueChange = { onEvent(UpsertPropiedadUiEvent.OnPrecioChanged(it.toDoubleOrNull() ?: 0.0)) },
-                        label = { Text("Precio") },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        isError = state.precioError != null,
-                        supportingText = {
-                            if(state.precioError != null){
-                                Text(text = state.precioError , color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                ExposedDropdownMenuBox(
-                    expanded = ciudadExpanded && state.filteredCiudades.isNotEmpty(),
-                    onExpandedChange = { }
-                ) {
-                    OutlinedTextField(
-                        value = state.ciudad,
-                        onValueChange = {
-                            onEvent(UpsertPropiedadUiEvent.OnCiudadChanged(it))
-                            ciudadExpanded = it.isNotEmpty()
-                        },
-                        label = { Text("Ciudad") },
-                        placeholder = { Text("Ingrese la ciudad donde está ubicada") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        shape = RoundedCornerShape(8.dp),
-                        isError = state.ciudadError != null,
-                        supportingText = {
-                            if(state.ciudadError != null){
-                                Text(text = state.ciudadError , color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    )
-
-                    if (state.filteredCiudades.isNotEmpty()) {
-                        ExposedDropdownMenu(
-                            expanded = ciudadExpanded,
-                            onDismissRequest = { ciudadExpanded = false }
-                        ) {
-                            state.filteredCiudades.take(5).forEach { ciudad ->
-                                DropdownMenuItem(
-                                    text = { Text(ciudad) },
-                                    onClick = {
-                                        onEvent(UpsertPropiedadUiEvent.OnCiudadChanged(ciudad))
-                                        ciudadExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                ExposedDropdownMenuBox(
-                    expanded = provinciaExpanded && state.filteredProvincias.isNotEmpty(),
-                    onExpandedChange = { }
-                ) {
-                    OutlinedTextField(
-                        value = state.estadoProvincia,
-                        onValueChange = {
-                            onEvent(UpsertPropiedadUiEvent.OnEstadoProvinciachanged(it))
-                            provinciaExpanded = it.isNotEmpty()
-                        },
-                        label = { Text("Provincia") },
-                        placeholder = { Text("Ingrese la provincia donde está ubicada") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        shape = RoundedCornerShape(8.dp),
-                        isError = state.estadoProvinciaError != null,
-                        supportingText = {
-                            if(state.estadoProvinciaError != null){
-                                Text(text = state.estadoProvinciaError , color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    )
-
-                    if (state.filteredProvincias.isNotEmpty()) {
-                        ExposedDropdownMenu(
-                            expanded = provinciaExpanded,
-                            onDismissRequest = { provinciaExpanded = false }
-                        ) {
-                            state.filteredProvincias.take(5).forEach { provincia ->
-                                DropdownMenuItem(
-                                    text = { Text(provincia) },
-                                    onClick = {
-                                        onEvent(UpsertPropiedadUiEvent.OnEstadoProvinciachanged(provincia))
-                                        provinciaExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = state.habitaciones.toString(),
-                        onValueChange = { onEvent(UpsertPropiedadUiEvent.OnHabitacionesChanged(it.toIntOrNull() ?: 0)) },
-                        label = { Text("Habitaciones") },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                    OutlinedTextField(
-                        value = state.banos.toString(),
-                        onValueChange = { onEvent(UpsertPropiedadUiEvent.OnBanosChanged(it.toDoubleOrNull() ?: 0.0)) },
-                        label = { Text("Baños") },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = state.parqueo.toString(),
-                        onValueChange = { onEvent(UpsertPropiedadUiEvent.OnParqueoChanged(it.toIntOrNull() ?: 0)) },
-                        label = { Text("Parqueos") },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                    OutlinedTextField(
-                        value = state.metrosCuadrados.toString(),
-                        onValueChange = { onEvent(UpsertPropiedadUiEvent.OnMetrosCuadradosChanged(it.toDoubleOrNull() ?: 0.0)) },
-                        label = { Text("Metros") },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        isError = state.metrosCuadradosError != null,
-                        supportingText = {
-                            if(state.metrosCuadradosError != null){
-                                Text(text = state.metrosCuadradosError , color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = state.descripcion,
-                    onValueChange = { onEvent(UpsertPropiedadUiEvent.OnDescripcionChanged(it)) },
-                    label = { Text("Descripción") },
-                    placeholder = { Text("Ingrese la descripción de la propiedad") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    maxLines = 6,
-                    shape = RoundedCornerShape(8.dp),
-                    isError = state.descripcionError != null,
-                    supportingText = {
-                        if(state.descripcionError != null){
-                            Text(text = state.descripcionError , color = MaterialTheme.colorScheme.error)
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                ExposedDropdownMenuBox(
-                    expanded = estadoExpanded,
-                    onExpandedChange = { estadoExpanded = !estadoExpanded }
-                ) {
-                    OutlinedTextField(
-                        value = state.estadoPropiedad,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Estado de la propiedad") },
-                        shape = RoundedCornerShape(8.dp),
-                        trailingIcon = {
-                            Icon(if(estadoExpanded)Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown, contentDescription = "Opciones de estados")
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        isError = state.estadoPropiedadError != null,
-                        supportingText = {
-                            if(state.estadoPropiedadError != null){
-                                Text(text = state.estadoPropiedadError , color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    )
-                    ExposedDropdownMenu(
-                        expanded = estadoExpanded,
-                        onDismissRequest = { estadoExpanded = false }
-                    ) {
-                        state.estadosPropiedades.forEach { estado ->
-                            DropdownMenuItem(
-                                text = { Text(estado.nombreEstado.toString()) },
-                                onClick = {
-                                    onEvent(UpsertPropiedadUiEvent.OnEstadoPropiedadIdChanged(estado.estadoPropiedadId, estado.nombreEstado ?: ""))
-                                    estadoExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = {onEvent(UpsertPropiedadUiEvent.ClearForm)},
-                        modifier = Modifier.weight(.5f),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            containerColor = Color.Transparent
-                        )
-                    ) {
-                        Icon(imageVector = Icons.Default.CleaningServices, contentDescription = "Volver")
-
-                    }
-                    Button(
-                        onClick = { onEvent(UpsertPropiedadUiEvent.SavePropiedad) },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Text("Guardar", color = Color.White)
-                    }
-                    if(state.isEditing){
-                        OutlinedButton(
-                            onClick = {onEvent(UpsertPropiedadUiEvent.ShowDeleteDialog)},
-                            modifier = Modifier.weight(.5f),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent,
-                                contentColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar")
-                        }
-                    }
-                }
             }
         }
-
     }
-    if(state.showDeleteDialog) {
+
+    if (state.showDeleteDialog) {
         deleteDialog(
             onDismiss = { onEvent(UpsertPropiedadUiEvent.HideDeleteDialog) },
             onConfirm = { onEvent(UpsertPropiedadUiEvent.OnDeletePropiedad(state.propiedadAEditar?.propiedadId ?: 0)) }
         )
     }
-
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun UpsertPropiedadTopBar(
+    isEditing: Boolean,
+    onNavigateBack: () -> Unit
+) {
+    CenterAlignedTopAppBar(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        navigationIcon = {
+            IconButton(
+                onClick = onNavigateBack,
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Volver",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        },
+        title = {
+            Text(
+                text = if (isEditing) "Editar Propiedad" else "Nueva Propiedad",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun LoadingSection() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(170.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularWavyProgressIndicator()
+    }
+}
+
+@Composable
+private fun UpsertPropiedadForm(
+    state: UpsertPropiedadUiState,
+    onEvent: (UpsertPropiedadUiEvent) -> Unit,
+    onImagePickerClick: () -> Unit
+) {
+    ImageUploadSection(onImagePickerClick)
+
+    ImageGallerySection(
+        imagenesCargadas = state.imagenesCargadas,
+        selectedImages = state.selectedImages,
+        onDeleteServerImage = { onEvent(UpsertPropiedadUiEvent.OnDeleteServerImage(it)) },
+        onDeleteSelectedImage = { onEvent(UpsertPropiedadUiEvent.OnDeleteSelectedImage(it)) }
+    )
+
+    BasicInfoSection(state, onEvent)
+    LocationSection(state, onEvent)
+    PropertyDetailsSection(state, onEvent)
+    DescriptionSection(state, onEvent)
+    StatusSection(state, onEvent)
+    ActionButtonsSection(state, onEvent)
+}
+
+@Composable
+private fun ImageUploadSection(onImagePickerClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(170.dp)
+            .padding(vertical = 8.dp)
+            .drawBehind {
+                val stroke = Stroke(
+                    width = 2.dp.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                )
+                val radius = 12.dp.toPx()
+                drawRoundRect(
+                    color = Color(0xFFAFBED0),
+                    style = stroke,
+                    cornerRadius = CornerRadius(radius, radius)
+                )
+            }
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.Transparent)
+            .clickable { onImagePickerClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.AddToPhotos,
+                contentDescription = "Subir imagenes",
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(35.dp)
+            )
+            Text(
+                text = "Subir imágenes",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun BasicInfoSection(
+    state: UpsertPropiedadUiState,
+    onEvent: (UpsertPropiedadUiEvent) -> Unit
+) {
+    OutlinedTextField(
+        value = state.titulo,
+        onValueChange = { onEvent(UpsertPropiedadUiEvent.OnTituloChanged(it)) },
+        label = { Text("Título") },
+        placeholder = { Text("Ingrese el título de la propiedad") },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        isError = state.tituloError != null,
+        supportingText = { state.tituloError?.let { Text(it, color = MaterialTheme.colorScheme.error) } }
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    TipoTransaccionDropdown(state, onEvent)
+    Spacer(modifier = Modifier.height(8.dp))
+
+    CategoriaDropdown(state, onEvent)
+    Spacer(modifier = Modifier.height(8.dp))
+
+    PrecioSection(state, onEvent)
+    Spacer(modifier = Modifier.height(8.dp))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TipoTransaccionDropdown(
+    state: UpsertPropiedadUiState,
+    onEvent: (UpsertPropiedadUiEvent) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = state.tipoTransaccion,
+            onValueChange = { onEvent(UpsertPropiedadUiEvent.OnTipoTransaccionChanged(it)) },
+            readOnly = true,
+            label = { Text("Tipo de Transacción") },
+            shape = RoundedCornerShape(8.dp),
+            trailingIcon = {
+                Icon(
+                    if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                    contentDescription = "Opciones de tipo de transacción"
+                )
+            },
+            modifier = Modifier.fillMaxWidth().menuAnchor(),
+            isError = state.tipoTransaccionError != null,
+            supportingText = {
+                state.tipoTransaccionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            listOf("Venta", "Alquiler").forEach { tipo ->
+                DropdownMenuItem(
+                    text = { Text(tipo) },
+                    onClick = {
+                        onEvent(UpsertPropiedadUiEvent.OnTipoTransaccionChanged(tipo))
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoriaDropdown(
+    state: UpsertPropiedadUiState,
+    onEvent: (UpsertPropiedadUiEvent) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = state.categoria,
+            onValueChange = { },
+            readOnly = true,
+            label = { Text("Tipo de Propiedad") },
+            shape = RoundedCornerShape(8.dp),
+            trailingIcon = {
+                Icon(
+                    if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                    contentDescription = "Opciones de categoria"
+                )
+            },
+            modifier = Modifier.fillMaxWidth().menuAnchor(),
+            isError = state.categoriaError != null,
+            supportingText = {
+                state.categoriaError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            state.categorias.forEach { categoria ->
+                DropdownMenuItem(
+                    text = { Text(categoria.nombreCategoria.toString()) },
+                    onClick = {
+                        onEvent(
+                            UpsertPropiedadUiEvent.OnCategoriaIdChanged(
+                                categoria.categoriaId,
+                                categoria.nombreCategoria ?: ""
+                            )
+                        )
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PrecioSection(
+    state: UpsertPropiedadUiState,
+    onEvent: (UpsertPropiedadUiEvent) -> Unit
+) {
+    var monedaExpanded by remember { mutableStateOf(false) }
+
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        ExposedDropdownMenuBox(
+            expanded = monedaExpanded,
+            modifier = Modifier.weight(1f),
+            onExpandedChange = { monedaExpanded = !monedaExpanded }
+        ) {
+            OutlinedTextField(
+                value = state.moneda,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Moneda") },
+                shape = RoundedCornerShape(8.dp),
+                trailingIcon = {
+                    Icon(
+                        if (monedaExpanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                        contentDescription = "Opciones de moneda"
+                    )
+                },
+                modifier = Modifier.fillMaxWidth().menuAnchor(),
+                isError = state.monedaError != null,
+                supportingText = {
+                    state.monedaError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+            )
+            ExposedDropdownMenu(
+                expanded = monedaExpanded,
+                onDismissRequest = { monedaExpanded = false }
+            ) {
+                listOf("Peso", "Dolar").forEach { moneda ->
+                    DropdownMenuItem(
+                        text = { Text(moneda) },
+                        onClick = {
+                            onEvent(UpsertPropiedadUiEvent.OnMonedaChanged(moneda))
+                            monedaExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+        OutlinedTextField(
+            value = state.precio.toString(),
+            onValueChange = { onEvent(UpsertPropiedadUiEvent.OnPrecioChanged(it.toDoubleOrNull() ?: 0.0)) },
+            label = { Text("Precio") },
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(8.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = state.precioError != null,
+            supportingText = {
+                state.precioError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LocationSection(
+    state: UpsertPropiedadUiState,
+    onEvent: (UpsertPropiedadUiEvent) -> Unit
+) {
+    var ciudadExpanded by remember { mutableStateOf(false) }
+    var provinciaExpanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = ciudadExpanded && state.filteredCiudades.isNotEmpty(),
+        onExpandedChange = { }
+    ) {
+        OutlinedTextField(
+            value = state.ciudad,
+            onValueChange = {
+                onEvent(UpsertPropiedadUiEvent.OnCiudadChanged(it))
+                ciudadExpanded = it.isNotEmpty()
+            },
+            label = { Text("Ciudad") },
+            placeholder = { Text("Ingrese la ciudad donde está ubicada") },
+            modifier = Modifier.fillMaxWidth().menuAnchor(),
+            shape = RoundedCornerShape(8.dp),
+            isError = state.ciudadError != null,
+            supportingText = {
+                state.ciudadError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
+        )
+
+        if (state.filteredCiudades.isNotEmpty()) {
+            ExposedDropdownMenu(
+                expanded = ciudadExpanded,
+                onDismissRequest = { ciudadExpanded = false }
+            ) {
+                state.filteredCiudades.take(5).forEach { ciudad ->
+                    DropdownMenuItem(
+                        text = { Text(ciudad) },
+                        onClick = {
+                            onEvent(UpsertPropiedadUiEvent.OnCiudadChanged(ciudad))
+                            ciudadExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    ExposedDropdownMenuBox(
+        expanded = provinciaExpanded && state.filteredProvincias.isNotEmpty(),
+        onExpandedChange = { }
+    ) {
+        OutlinedTextField(
+            value = state.estadoProvincia,
+            onValueChange = {
+                onEvent(UpsertPropiedadUiEvent.OnEstadoProvinciachanged(it))
+                provinciaExpanded = it.isNotEmpty()
+            },
+            label = { Text("Provincia") },
+            placeholder = { Text("Ingrese la provincia donde está ubicada") },
+            modifier = Modifier.fillMaxWidth().menuAnchor(),
+            shape = RoundedCornerShape(8.dp),
+            isError = state.estadoProvinciaError != null,
+            supportingText = {
+                state.estadoProvinciaError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
+        )
+
+        if (state.filteredProvincias.isNotEmpty()) {
+            ExposedDropdownMenu(
+                expanded = provinciaExpanded,
+                onDismissRequest = { provinciaExpanded = false }
+            ) {
+                state.filteredProvincias.take(5).forEach { provincia ->
+                    DropdownMenuItem(
+                        text = { Text(provincia) },
+                        onClick = {
+                            onEvent(UpsertPropiedadUiEvent.OnEstadoProvinciachanged(provincia))
+                            provinciaExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+private fun PropertyDetailsSection(
+    state: UpsertPropiedadUiState,
+    onEvent: (UpsertPropiedadUiEvent) -> Unit
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = state.habitaciones.toString(),
+            onValueChange = { onEvent(UpsertPropiedadUiEvent.OnHabitacionesChanged(it.toIntOrNull() ?: 0)) },
+            label = { Text("Habitaciones") },
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(8.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+        OutlinedTextField(
+            value = state.banos.toString(),
+            onValueChange = { onEvent(UpsertPropiedadUiEvent.OnBanosChanged(it.toDoubleOrNull() ?: 0.0)) },
+            label = { Text("Baños") },
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(8.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = state.parqueo.toString(),
+            onValueChange = { onEvent(UpsertPropiedadUiEvent.OnParqueoChanged(it.toIntOrNull() ?: 0)) },
+            label = { Text("Parqueos") },
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(8.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+        OutlinedTextField(
+            value = state.metrosCuadrados.toString(),
+            onValueChange = { onEvent(UpsertPropiedadUiEvent.OnMetrosCuadradosChanged(it.toDoubleOrNull() ?: 0.0)) },
+            label = { Text("Metros") },
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(8.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = state.metrosCuadradosError != null,
+            supportingText = {
+                state.metrosCuadradosError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
+        )
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+private fun DescriptionSection(
+    state: UpsertPropiedadUiState,
+    onEvent: (UpsertPropiedadUiEvent) -> Unit
+) {
+    OutlinedTextField(
+        value = state.descripcion,
+        onValueChange = { onEvent(UpsertPropiedadUiEvent.OnDescripcionChanged(it)) },
+        label = { Text("Descripción") },
+        placeholder = { Text("Ingrese la descripción de la propiedad") },
+        modifier = Modifier.fillMaxWidth().height(200.dp),
+        maxLines = 6,
+        shape = RoundedCornerShape(8.dp),
+        isError = state.descripcionError != null,
+        supportingText = {
+            state.descripcionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        }
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun StatusSection(
+    state: UpsertPropiedadUiState,
+    onEvent: (UpsertPropiedadUiEvent) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = state.estadoPropiedad,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Estado de la propiedad") },
+            shape = RoundedCornerShape(8.dp),
+            trailingIcon = {
+                Icon(
+                    if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                    contentDescription = "Opciones de estados"
+                )
+            },
+            modifier = Modifier.fillMaxWidth().menuAnchor(),
+            isError = state.estadoPropiedadError != null,
+            supportingText = {
+                state.estadoPropiedadError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            state.estadosPropiedades.forEach { estado ->
+                DropdownMenuItem(
+                    text = { Text(estado.nombreEstado.toString()) },
+                    onClick = {
+                        onEvent(
+                            UpsertPropiedadUiEvent.OnEstadoPropiedadIdChanged(
+                                estado.estadoPropiedadId,
+                                estado.nombreEstado ?: ""
+                            )
+                        )
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActionButtonsSection(
+    state: UpsertPropiedadUiState,
+    onEvent: (UpsertPropiedadUiEvent) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        OutlinedButton(
+            onClick = { onEvent(UpsertPropiedadUiEvent.ClearForm) },
+            modifier = Modifier.weight(.5f),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.primary,
+                containerColor = Color.Transparent
+            )
+        ) {
+            Icon(imageVector = Icons.Default.CleaningServices, contentDescription = "Volver")
+        }
+        Button(
+            onClick = { onEvent(UpsertPropiedadUiEvent.SavePropiedad) },
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text("Guardar", color = Color.White)
+        }
+        if (state.isEditing) {
+            OutlinedButton(
+                onClick = { onEvent(UpsertPropiedadUiEvent.ShowDeleteDialog) },
+                modifier = Modifier.weight(.5f),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar")
+            }
+        }
+    }
+}
+
 
 @Composable
 fun deleteDialog(
