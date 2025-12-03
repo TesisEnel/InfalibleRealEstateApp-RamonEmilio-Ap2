@@ -9,4 +9,5 @@ interface HomeUiEvent {
     data class CategoriaSeleccionada(val categoria: String): HomeUiEvent
     data class LoadPropiedad(val id: Int): HomeUiEvent
     data class AddToCart(val propiedad: Propiedades): HomeUiEvent
+    data object LoadInitialData: HomeUiEvent
 }
