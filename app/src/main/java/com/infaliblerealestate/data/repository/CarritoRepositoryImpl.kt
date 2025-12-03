@@ -6,7 +6,6 @@ import com.infaliblerealestate.data.remote.Resource
 import com.infaliblerealestate.data.remote.carrito.CarritoRemoteDataSource
 import com.infaliblerealestate.dominio.model.Carrito
 import com.infaliblerealestate.dominio.model.CarritoAddItem
-import com.infaliblerealestate.dominio.model.CarritoItem
 import com.infaliblerealestate.dominio.repository.CarritoRepository
 import javax.inject.Inject
 
