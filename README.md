@@ -4,6 +4,13 @@
 **Matrícula:** 2023-0010  
 **Semestre:** 2025-03
 
+**Admin** 
+danielvilopez@gmail.com
+Daniel16_
+
+**Usuario**
+estivenreinoso13@gmail.com
+DaNiEl16_
 ---
 
 ## 📱 Sobre la Aplicación
