@@ -10,7 +10,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,24 +44,26 @@ import androidx.compose.material.icons.filled.Store
 import androidx.compose.material.icons.filled.Villa
 import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
 import com.infaliblerealestate.dominio.model.ImagenPropiedad
 import com.infaliblerealestate.dominio.model.PropiedadesDetalle
 import com.infaliblerealestate.presentation.util.components.PropiedadItem
 import com.infaliblerealestate.presentation.util.components.PropiedadChip
 import com.infaliblerealestate.presentation.util.components.SheetPropiedadDetalle
-import com.infaliblerealestate.presentation.util.navigation.Screen
+import com.infaliblerealestate.presentation.util.components.ThemedSnackbarHost
 import com.infaliblerealestate.ui.theme.InfalibleRealEstateTheme
 
 @Composable
 fun CatalogoScreen(
     categoriaInicial: String? = null,
     viewModel: CatalogoViewModel = hiltViewModel(),
-    navController: NavController? = null,
+    onNavigateToUpsertPropiedad: (String?, Int?, Boolean) -> Unit,
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -85,7 +86,7 @@ fun CatalogoScreen(
         onEvent = viewModel::onEvent,
         snack = snack,
         state = state,
-        navController = navController
+        onNavigateToUpsertPropiedad = onNavigateToUpsertPropiedad
     )
 }
 
@@ -95,37 +96,40 @@ fun CatalogoContent(
     onEvent: (CatalogoUiEvent) -> Unit,
     snack: SnackbarHostState,
     state: CatalogoUiState,
-    navController: NavController?
+    onNavigateToUpsertPropiedad: (String?, Int?, Boolean) -> Unit
 ) {
+    val pullToRefreshState = rememberPullToRefreshState()
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navController?.navigate(
-                                Screen.UpsertPropiedad.createRoute(usuarioId = "D")
+                    .padding(horizontal = 8.dp),
+                navigationIcon = if (state.isAdmin) {
+                    {
+                        IconButton(
+                            onClick = {
+                                onNavigateToUpsertPropiedad(state.usuario?.id, null, state.isAdmin)
+                            },
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .size(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Agregar propiedad",
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer
                             )
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .size(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Agregar propiedad",
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                        }
                     }
+                } else {
+                    {}
                 },
-
                 title = {
                     Text(
                         text = "Catálogo",
@@ -155,66 +159,72 @@ fun CatalogoContent(
             )
         },
         snackbarHost = {
-            SnackbarHost(
+            ThemedSnackbarHost(
                 hostState = snack,
                 modifier = Modifier.padding(bottom = 96.dp)
             )
         },
     ) { padding ->
-        Column(
+        PullToRefreshBox(
             modifier = Modifier
                 .padding(padding)
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .background(Color.Transparent),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-
+                .fillMaxSize(),
+            isRefreshing = state.isLoading,
+            state = pullToRefreshState,
+            onRefresh = { onEvent(CatalogoUiEvent.filterPropiedades) },
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    state = pullToRefreshState,
+                    isRefreshing = state.isLoading,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
+            }
         ) {
-            if(state.isLoading){
-                CircularWavyProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = state.infoMessage ?: "Cargando...",
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-
-
-                )
-            }else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp)
+                    .background(Color.Transparent),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 val propiedades = state.propiedades
-                if(propiedades.isEmpty()){
+                if (!state.isLoading && propiedades.isEmpty()) {
                     Text(
-                        text = "No hay propiedades disponibles",
+                        text = state.infoMessage ?: "No hay propiedades disponibles",
                         modifier = Modifier.align(Alignment.CenterHorizontally),
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }else {
+                } else if (propiedades.isNotEmpty()) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ){
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(bottom = 100.dp)
+                    ) {
                         items(
                             items = propiedades,
                             key = { propiedad -> propiedad.propiedadId }
                         ) { propiedad ->
                             PropiedadItem(
                                 propiedad = propiedad,
-                                onClick = { onEvent(CatalogoUiEvent.loadPropiedad(propiedad.propiedadId)) }
+                                onClick = { onEvent(CatalogoUiEvent.loadPropiedad(propiedad.propiedadId)) },
+                                onAddToCart = { onEvent(CatalogoUiEvent.addToCart(propiedad)) },
+                                onEdit = {
+                                    onNavigateToUpsertPropiedad(state.usuario?.id, propiedad.propiedadId, state.isAdmin)
+                                },
+                                showAdminOptions = state.isAdmin
                             )
                         }
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(90.dp))
         }
     }
-    if(state.showFilterDialog){
+
+    if (state.showFilterDialog) {
         FilterDialog(
             state = state,
             onEvent = onEvent
@@ -516,7 +526,7 @@ fun CatalogoContentPreview() {
                 showSheet = false,
                 propiedad = null
             ),
-            navController = null
+            onNavigateToUpsertPropiedad = { _, _, _ -> }
         )
     }
 }
