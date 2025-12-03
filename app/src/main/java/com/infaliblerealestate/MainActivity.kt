@@ -17,7 +17,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.infaliblerealestate.presentation.util.navigation.AppBottomBar
 import com.infaliblerealestate.presentation.util.navigation.AppNavHost
-import com.infaliblerealestate.presentation.util.navigation.Screen
 import com.infaliblerealestate.ui.theme.InfalibleRealEstateTheme
 import dagger.hilt.android.AndroidEntryPoint
 
