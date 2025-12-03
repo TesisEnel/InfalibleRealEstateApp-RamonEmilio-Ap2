@@ -1,7 +1,7 @@
 package com.infaliblerealestate.dominio.usecase.workerhelper
 
 import com.infaliblerealestate.worker.WorkManagerHelper
-import jakarta.inject.Inject
+import javax.inject.Inject
 
 class ScheduleSyncWorkUseCase @Inject constructor(
     private val workManagerHelper: WorkManagerHelper

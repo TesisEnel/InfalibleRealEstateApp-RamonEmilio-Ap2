@@ -74,25 +74,40 @@ class UsuarioRepositoryImpl @Inject constructor(
         localDataSource.insertUsuario(usuario.toEntity())
     }
 
-    override suspend fun syncUsuario(id: String): Resource<Usuario?> {
-        val lastSync = localDataSource.getLastSync(id) ?: 0
-        val now = System.currentTimeMillis()
-
-        if (now - lastSync < SYNC_INTERVAL) {
-            return Resource.Success(null)
+    override suspend fun updateUsuarioLocal(usuario: Usuario): Resource<Usuario> {
+        return try {
+            val entity = usuario.toEntity()
+            localDataSource.updateUsuario(entity)
+            Resource.Success(usuario)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Error al actualizar usuario local")
         }
+    }
 
-        val result = remoteDataSource.getUsuario(id)
-        return when(result) {
-            is Resource.Success -> {
-                val usuario = result.data?.toDomain()
-                usuario?.let {
-                    localDataSource.insertUsuario(it.toEntity())
+    override suspend fun syncUsuarioToRemote(id: String): Resource<Usuario> {
+        return try {
+            val usuarioEntity = localDataSource.getUsuarioById(id)
+                ?: return Resource.Error("Usuario no encontrado en base de datos local")
+
+            val usuario = usuarioEntity.toDomain()
+
+            when(val result = remoteDataSource.putUsuario(id, usuario.toDto())) {
+                is Resource.Success -> {
+                    val usuarioActualizado = result.data?.toDomain()
+                        ?: return Resource.Error("Respuesta vacía del servidor")
+
+                    localDataSource.updateUsuario(usuarioActualizado.toEntity())
+                    Resource.Success(usuarioActualizado)
                 }
-                Resource.Success(usuario)
+                is Resource.Error -> {
+                    Resource.Error(result.message ?: "Error al sincronizar con servidor")
+                }
+                else -> {
+                    Resource.Error("Error al actualizar el usuario en el servidor")
+                }
             }
-            is Resource.Error -> Resource.Error(result.message ?: "Error")
-            else -> Resource.Error("Error al sincronizar usuario")
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Error de red al sincronizar")
         }
     }
 

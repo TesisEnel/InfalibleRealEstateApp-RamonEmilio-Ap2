@@ -25,21 +25,30 @@ class SyncUsuarioWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return try {
-            val usuarioId = inputData.getString(USUARIO_ID_KEY) ?: return Result.failure()
+            val usuarioId = inputData.getString(USUARIO_ID_KEY)
+                ?: return Result.failure()
 
-            when (val result = repository.syncUsuario(usuarioId)) {
+            when (val result = repository.syncUsuarioToRemote(usuarioId)) {
                 is Resource.Success -> {
-                    Log.d("SyncWorker", "Sincronización exitosa")
                     Result.success()
                 }
                 is Resource.Error -> {
-                    Log.e("SyncWorker", "Error: ${result.message}")
-                    Result.retry()
+                    if (runAttemptCount < 3) {
+                        Result.retry()
+                    } else {
+                        Result.failure()
+                    }
                 }
-                else -> Result.failure()
+                else -> {
+                    Result.failure()
+                }
             }
         } catch (e: Exception) {
-            Result.retry()
+            if (runAttemptCount < 3) {
+                Result.retry()
+            } else {
+                Result.failure()
+            }
         }
     }
 }

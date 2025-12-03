@@ -10,8 +10,11 @@ interface UsuarioRepository {
     suspend fun getUsuario(id: String): Resource<Usuario?>
     suspend fun putUsuario(id: String, usuario: Usuario): Resource<Usuario?>
     fun getUsuarioActual(): Flow<Usuario?>
-    suspend fun syncUsuario(id: String): Resource<Usuario?>
     suspend fun logout()
     suspend fun insertUsuario(usuario: Usuario)
+    suspend fun updateUsuarioLocal(usuario: Usuario): Resource<Usuario>
+    suspend fun syncUsuarioToRemote(id: String): Resource<Usuario>
+
+
 
 }

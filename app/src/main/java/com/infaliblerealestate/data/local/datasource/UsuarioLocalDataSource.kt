@@ -14,7 +14,12 @@ class UsuarioLocalDataSource @Inject constructor(
 
     suspend fun insertUsuario(usuario: UsuarioEntity) = dao.insertUsuario(usuario)
 
+    suspend fun updateUsuario(usuario: UsuarioEntity) = dao.updateUsuario(usuario)
+
+    suspend fun getUsuarioById(id: String): UsuarioEntity? = dao.getUsuarioById(id)
+
     suspend fun clearSession() = dao.deleteAllUsuarios()
 
     suspend fun getLastSync(id: String): Long? = dao.getLastSync(id)
+
 }
