@@ -190,7 +190,8 @@ app/src/main/java/com/infaliblerealestate/
 <img width="259" height="541" alt="image" src="https://github.com/user-attachments/assets/569edddb-85f6-4bf8-887d-73a1cbebd393" />
 <img width="258" height="544" alt="image" src="https://github.com/user-attachments/assets/62ad8adf-e34d-4fbf-bbe8-4e9368d3757c" /><img width="260" height="545" alt="image" src="https://github.com/user-attachments/assets/61e3e3a2-4068-4859-a7bd-981bacf80b96" /><img width="259" height="546" alt="image" src="https://github.com/user-attachments/assets/ddd86cda-6463-4abb-a4c5-d88ee8157d32" />
 <img width="265" height="544" alt="image" src="https://github.com/user-attachments/assets/9eb9eeee-f80f-45e5-89f4-49e0737de233" />
-<img width="262" height="545" alt="image" src="https://github.com/user-attachments/assets/d14ec8f1-8a31-4aad-88b4-4f690790dab9" /><img width="262" height="541" alt="image" src="https://github.com/user-attachments/assets/f0ed8b54-e88a-451f-8248-1f8fb9645712" /><img width="258" height="547" alt="image" src="https://github.com/user-attachments/assets/801247a4-dbae-412b-bbd8-8314a71b7d42" />
+<img width="262" height="545" alt="image" src="https://github.com/user-attachments/assets/d14ec8f1-8a31-4aad-88b4-4f690790dab9" /><img width="262" height="541" alt="image" src="https://github.com/user-attachments/assets/f0ed8b54-e88a-451f-8248-1f8fb9645712" /><img width="258" height="547" alt="image" src="https://github.com/user-attachments/assets/801247a4-dbae-412b-bbd8-8314a71b7d42" /><img width="262" height="547" alt="image" src="https://github.com/user-attachments/assets/8d5125e0-1842-4031-8538-fe3679f550ea" />
+
 
 
 
