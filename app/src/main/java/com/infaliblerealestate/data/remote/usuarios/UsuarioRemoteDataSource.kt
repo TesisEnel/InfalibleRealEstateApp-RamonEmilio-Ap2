@@ -22,7 +22,7 @@ class UsuarioRemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun getUsuario(id: Int): Resource<UsuarioResponse?>{
+    suspend fun getUsuario(id: String): Resource<UsuarioResponse?>{
         return try {
             val response = apiService.getUsuario(id)
             if(response.isSuccessful){
@@ -36,7 +36,7 @@ class UsuarioRemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun putUsuario(id: Int, usuario: UsuarioRequest): Resource<UsuarioResponse?>{
+    suspend fun putUsuario(id: String, usuario: UsuarioRequest): Resource<UsuarioResponse?>{
         return try{
             val response = apiService.putUsuario(id, usuario)
             if(response.isSuccessful){

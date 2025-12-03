@@ -1,8 +1,8 @@
 package com.infaliblerealestate.presentation.util.navigation
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontVariation
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -13,6 +13,7 @@ import com.infaliblerealestate.presentation.catalogo.CatalogoScreen
 import com.infaliblerealestate.presentation.home.HomeScreen
 import com.infaliblerealestate.presentation.login.LoginScreen
 import com.infaliblerealestate.presentation.settings.SettingsScreen
+import com.infaliblerealestate.presentation.upsertPropiedad.UpsertPropiedadScreen
 
 @Composable
 fun AppNavHost(
@@ -24,16 +25,21 @@ fun AppNavHost(
         startDestination = Screen.Home.route,
         modifier = modifier
     ){
-        composable(
-            route = Screen.Home.route,
-            arguments = listOf(
-                navArgument(Screen.Home.ARG) { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getString(Screen.Home.ARG)
+        composable(route = Screen.Home.route) {
             HomeScreen(
-                navController = navController,
-                usuarioId = id
+                onNavigateToCatalogo = { categoria ->
+                    navController.navigate(
+                        Screen.Catalogo.createRoute(Uri.encode(categoria))
+                    ) {
+                        popUpTo(Screen.Home.route) { saveState = true }
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToUpsertPropiedad = { usuarioId, propiedadId, isAdmin ->
+                    navController.navigate(
+                        Screen.UpsertPropiedad.createRoute(usuarioId, propiedadId, isAdmin)
+                    )
+                }
             )
         }
 
@@ -45,8 +51,12 @@ fun AppNavHost(
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString(Screen.Settings.ARG)
             SettingsScreen(
-                navController = navController,
-                usuarioId = id
+                usuarioId = id,
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
 
@@ -63,7 +73,6 @@ fun AppNavHost(
         composable(
             route = Screen.Catalogo.route,
             arguments = listOf(
-                navArgument(Screen.Catalogo.ARG) { type = NavType.StringType },
                 navArgument(Screen.Catalogo.CATEGORIA_ARG) {
                     type = NavType.StringType
                     nullable = true
@@ -71,16 +80,55 @@ fun AppNavHost(
                 }
             )
         ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getString(Screen.Catalogo.ARG)
             val categoria = backStackEntry.arguments?.getString(Screen.Catalogo.CATEGORIA_ARG)
             CatalogoScreen(
-                usuarioId = id,
-                categoriaInicial = categoria
+                categoriaInicial = categoria,
+                onNavigateToUpsertPropiedad = { usuarioId, propiedadId, isAdmin ->
+                    navController.navigate(
+                        Screen.UpsertPropiedad.createRoute(usuarioId, propiedadId, isAdmin)
+                    )
+                }
+            )
+        }
+
+        composable(
+            route = Screen.UpsertPropiedad.route,
+            arguments = listOf(
+                navArgument(Screen.UpsertPropiedad.USUARIO_ID_ARG) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(Screen.UpsertPropiedad.PROPIEDAD_ID_ARG) {
+                    type = NavType.IntType
+                    defaultValue = -1
+                },
+                navArgument("isAdmin") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) { backStackEntry ->
+            val usuarioId = backStackEntry.arguments?.getString(Screen.UpsertPropiedad.USUARIO_ID_ARG)
+            val propiedadId = backStackEntry.arguments?.getInt(Screen.UpsertPropiedad.PROPIEDAD_ID_ARG) ?.takeIf { it != -1 }
+            val isAdmin = backStackEntry.arguments?.getBoolean("isAdmin") ?: false
+            UpsertPropiedadScreen(
+                usuarioId = usuarioId,
+                propiedadId = propiedadId,
+                isAdmin = isAdmin,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
             )
         }
 
         composable(Screen.Login.route) {
-            LoginScreen(navController = navController)
+            LoginScreen(
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.createRoute()) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

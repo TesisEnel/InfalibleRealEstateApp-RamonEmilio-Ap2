@@ -3,12 +3,18 @@ package com.infaliblerealestate.data.mapper
 import com.infaliblerealestate.data.remote.dto.propiedades.request.ImagenPropiedadRequest
 import com.infaliblerealestate.data.remote.dto.propiedades.request.PropiedadesDetalleRequest
 import com.infaliblerealestate.data.remote.dto.propiedades.request.PropiedadesRequest
+import com.infaliblerealestate.data.remote.dto.propiedades.response.CategoriaResponse
+import com.infaliblerealestate.data.remote.dto.propiedades.response.EstadoPropiedadResponse
 import com.infaliblerealestate.data.remote.dto.propiedades.response.ImagenPropiedadResponse
 import com.infaliblerealestate.data.remote.dto.propiedades.response.PropiedadesDetalleResponse
 import com.infaliblerealestate.data.remote.dto.propiedades.response.PropiedadesResponse
+import com.infaliblerealestate.data.remote.dto.propiedades.response.UbicacionResponse
+import com.infaliblerealestate.dominio.model.Categorias
+import com.infaliblerealestate.dominio.model.EstadoPropiedad
 import com.infaliblerealestate.dominio.model.ImagenPropiedad
 import com.infaliblerealestate.dominio.model.Propiedades
 import com.infaliblerealestate.dominio.model.PropiedadesDetalle
+import com.infaliblerealestate.dominio.model.Ubicacion
 
 fun Propiedades.toRequest(): PropiedadesRequest = PropiedadesRequest(
     titulo = titulo,
@@ -18,6 +24,7 @@ fun Propiedades.toRequest(): PropiedadesRequest = PropiedadesRequest(
     estadoProvincia = estadoProvincia,
     tipoTransaccion = tipoTransaccion,
     categoriaId = categoriaId,
+    administradorId = administradorId,
     fechaPublicacion = fechaPublicacion,
     fechaActualizacion = fechaActualizacion,
     estadoPropiedadId = estadoPropiedadId,
@@ -75,7 +82,8 @@ fun PropiedadesResponse.toDomain(): Propiedades = Propiedades(
     fechaActualizacion = fechaActualizacion,
     estadoPropiedadId = estadoPropiedadId,
     detalle = detalle.toDomain(),
-    imagenes = imagenes.map { it.toDomain() }
+    imagenes = imagenes.map { it.toDomain() },
+    administradorId = null
 )
 
 fun PropiedadesDetalleResponse.toDomain(): PropiedadesDetalle = PropiedadesDetalle(
@@ -102,3 +110,22 @@ fun ImagenPropiedadResponse.toDomain(): ImagenPropiedad = ImagenPropiedad(
     urlImagen = urlImagen,
     orden = orden
 )
+
+fun CategoriaResponse.toDomain(): Categorias = Categorias(
+    categoriaId = categoriaId,
+    nombreCategoria = nombreCategoria,
+    descripcion = descripcion
+)
+
+fun EstadoPropiedadResponse.toDomain(): EstadoPropiedad = EstadoPropiedad(
+    estadoPropiedadId = estadoPropiedadId,
+    nombreEstado = nombreEstado,
+    descripcion = descripcion
+)
+
+fun UbicacionResponse.toDomain(): Ubicacion = Ubicacion(
+    provincias = provincias,
+    ciudades = ciudades
+)
+
+

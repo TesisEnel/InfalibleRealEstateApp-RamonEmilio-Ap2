@@ -8,6 +8,7 @@ import com.infaliblerealestate.dominio.model.Usuario
 import com.infaliblerealestate.dominio.usecase.usuarios.InsertUsuarioUseCase
 import com.infaliblerealestate.dominio.usecase.usuarios.LogOutUseCase
 import com.infaliblerealestate.dominio.usecase.usuarios.ValidarCredencialesUseCase
+import com.infaliblerealestate.dominio.usecase.workerhelper.ScheduleSyncWorkUseCase
 import com.infaliblerealestate.worker.WorkManagerHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,8 @@ class LoginViewModel @Inject constructor(
     val validarCredencialesUseCase: ValidarCredencialesUseCase,
     val insertUsuarioUseCase: InsertUsuarioUseCase,
     val logOutUseCase: LogOutUseCase,
-    var workManagerHelper: WorkManagerHelper
+    var workManagerHelper: WorkManagerHelper,
+    var ScheduleSyncWorkUseCase: ScheduleSyncWorkUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(LoginUiState())
     val state: StateFlow<LoginUiState> = _state.asStateFlow()
@@ -89,7 +91,8 @@ class LoginViewModel @Inject constructor(
                                 rol = loginResponse.rol
                             )
                         )
-                        workManagerHelper.scheduleSyncWork(loginResponse.id)
+
+                        ScheduleSyncWorkUseCase(loginResponse.id)
 
                         _state.update {
                             it.copy(

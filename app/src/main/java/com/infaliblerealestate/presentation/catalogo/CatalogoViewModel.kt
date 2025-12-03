@@ -3,8 +3,12 @@ package com.infaliblerealestate.presentation.catalogo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infaliblerealestate.data.remote.Resource
+import com.infaliblerealestate.dominio.model.CarritoAddItem
+import com.infaliblerealestate.dominio.model.Propiedades
+import com.infaliblerealestate.dominio.usecase.carrito.PostCarritoUseCase
 import com.infaliblerealestate.dominio.usecase.propiedades.GetPropiedadUseCase
 import com.infaliblerealestate.dominio.usecase.propiedades.GetPropiedadesUseCase
+import com.infaliblerealestate.dominio.usecase.usuarios.GetUsuarioActualUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,33 +16,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.compareTo
-import kotlin.text.compareTo
 
 @HiltViewModel
 class CatalogoViewModel @Inject constructor(
     val getPropiedadesUseCase: GetPropiedadesUseCase,
-    val getPropiedadUseCase: GetPropiedadUseCase
+    val getPropiedadUseCase: GetPropiedadUseCase,
+    val getUsuarioActualUseCase: GetUsuarioActualUseCase,
+    val postCarritoUseCase: PostCarritoUseCase,
 ): ViewModel() {
     private val _state = MutableStateFlow(CatalogoUiState())
     val state: StateFlow<CatalogoUiState> = _state.asStateFlow()
+
     init {
         getPropiedades()
-    }
-    fun getPropiedades() {
-        viewModelScope.launch {
-            _state.value = state.value.copy(
-                isLoading = true,
-                infoMessage = "Cargando propiedades..."
-            )
-            getPropiedadesUseCase().collect { propiedades ->
-                _state.update { state -> state.copy(
-                    propiedades = propiedades,
-                    isLoading = false,
-                    infoMessage = null
-                ) }
-            }
-        }
+        getUsuarioActual()
     }
 
     fun onEvent(event: CatalogoUiEvent){
@@ -46,6 +37,7 @@ class CatalogoViewModel @Inject constructor(
             is CatalogoUiEvent.userMessageShown -> { _state.update { state -> state.copy(userMessage = null) } }
             is CatalogoUiEvent.hideSheet -> {_state.update { state -> state.copy(showSheet = false) }}
             is CatalogoUiEvent.loadPropiedad -> {loadPropiedad(event.id)}
+            is CatalogoUiEvent.addToCart -> { addToCart(event.propiedad) }
             is CatalogoUiEvent.filterPropiedades -> { filterPropiedades() }
             is CatalogoUiEvent.hideFilterDialog -> {
                 _state.update { it.copy(showFilterDialog = false) }
@@ -66,8 +58,8 @@ class CatalogoViewModel @Inject constructor(
             is CatalogoUiEvent.onFilterPenthouse -> {
                 _state.update { it.copy(filtroPenthouse = event.filter  ) }
             }
-            is CatalogoUiEvent.onFilterSolar -> {
-                _state.update { it.copy(filtroSolar = event.filter) }
+            is CatalogoUiEvent.onFilterTerreno -> {
+                _state.update { it.copy(filtroTerreno = event.filter) }
             }
             is CatalogoUiEvent.onFilterLocalComercial -> {
                 _state.update { it.copy(filtroLocalComercial = event.filter) }
@@ -95,6 +87,33 @@ class CatalogoViewModel @Inject constructor(
             }
             is CatalogoUiEvent.aplicarCategoriaInicial -> {
                 aplicarCategoriaInicial(event.categoria)
+            }
+        }
+    }
+
+    fun getPropiedades() {
+        viewModelScope.launch {
+            _state.value = state.value.copy(
+                isLoading = true,
+                infoMessage = "Cargando propiedades..."
+            )
+            getPropiedadesUseCase().collect { propiedades ->
+                _state.update { state -> state.copy(
+                    propiedades = propiedades,
+                    isLoading = false,
+                    infoMessage = null
+                ) }
+            }
+        }
+    }
+
+    fun getUsuarioActual() {
+        viewModelScope.launch {
+            getUsuarioActualUseCase().collect { usuario ->
+                _state.update { state -> state.copy(
+                    usuario = usuario,
+                    isAdmin = usuario?.rol?.equals("Admin", ignoreCase = true) == true
+                ) }
             }
         }
     }
@@ -145,7 +164,7 @@ class CatalogoViewModel @Inject constructor(
                     if (_state.value.filtroDepartamento) add(1)
                     if (_state.value.filtroVilla) add(5)
                     if (_state.value.filtroPenthouse) add(6)
-                    if (_state.value.filtroSolar) add(3)
+                    if (_state.value.filtroTerreno) add(3)
                     if (_state.value.filtroLocalComercial) add(4)
                 }
 
@@ -180,7 +199,7 @@ class CatalogoViewModel @Inject constructor(
                     filtroDepartamento = false,
                     filtroVilla = false,
                     filtroPenthouse = false,
-                    filtroSolar = false,
+                    filtroTerreno = false,
                     filtroLocalComercial = false,
                     filtroPrecio = 0.0f,
                     filtroHabitaciones = 0,
@@ -201,13 +220,40 @@ class CatalogoViewModel @Inject constructor(
                 "Departamento" -> _state.update { it.copy(filtroDepartamento = true) }
                 "Villa" -> _state.update { it.copy(filtroVilla = true) }
                 "Penthouse" -> _state.update { it.copy(filtroPenthouse = true) }
-                "Solar" -> _state.update { it.copy(filtroSolar = true) }
+                "Terreno" -> _state.update { it.copy(filtroTerreno = true) }
                 "Local Comercial" -> _state.update { it.copy(filtroLocalComercial = true) }
             }
             filterPropiedades()
         }
 
     }
+
+    fun addToCart(propiedad: Propiedades) {
+        viewModelScope.launch {
+            val usuarioId = state.value.usuario?.id
+
+            if (usuarioId == null) {
+                _state.update { it.copy(userMessage = "Debe iniciar sesión para agregar al carrito") }
+                return@launch
+            }
+            val item = CarritoAddItem(propiedadId = propiedad.propiedadId)
+
+            when (val result = postCarritoUseCase(usuarioId, item)) {
+                is Resource.Success -> {
+                    _state.update { it.copy(userMessage = "Propiedad agregada al carrito") }
+                }
+                is Resource.Error -> {
+                    _state.update { it.copy(userMessage = result.message ?: "Error al agregar al carrito") }
+                }
+                else -> {
+                    _state.update { it.copy(userMessage = "Error desconocido") }
+                }
+                }
+
+        }
+    }
+
+
 
 
 

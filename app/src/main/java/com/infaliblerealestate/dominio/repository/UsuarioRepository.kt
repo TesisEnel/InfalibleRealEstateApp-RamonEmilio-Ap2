@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface UsuarioRepository {
     suspend fun validarCredenciales(credenciales: Login): Resource<Usuario?>
-    suspend fun getUsuario(id: Int): Resource<Usuario?>
-    suspend fun putUsuario(id: Int, usuario: Usuario): Resource<Usuario?>
+    suspend fun getUsuario(id: String): Resource<Usuario?>
+    suspend fun putUsuario(id: String, usuario: Usuario): Resource<Usuario?>
     fun getUsuarioActual(): Flow<Usuario?>
     suspend fun syncUsuario(id: String): Resource<Usuario?>
     suspend fun logout()

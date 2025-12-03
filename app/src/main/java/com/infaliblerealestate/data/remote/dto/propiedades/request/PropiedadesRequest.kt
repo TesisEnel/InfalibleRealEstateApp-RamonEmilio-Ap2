@@ -8,6 +8,7 @@ data class PropiedadesRequest(
     val estadoProvincia: String,
     val tipoTransaccion: String,
     val categoriaId: Int,
+    val administradorId: String?,
     val fechaPublicacion: String,
     val fechaActualizacion: String,
     val estadoPropiedadId: Int,

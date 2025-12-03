@@ -4,7 +4,6 @@ import com.infaliblerealestate.data.local.entities.UsuarioEntity
 import com.infaliblerealestate.data.remote.dto.usuarios.UsuarioRequest
 import com.infaliblerealestate.data.remote.dto.usuarios.UsuarioResponse
 import com.infaliblerealestate.dominio.model.Usuario
-
 fun Usuario.toDto() : UsuarioRequest = UsuarioRequest(
     phoneNumber = phoneNumber,
     nombre = nombre,
@@ -22,7 +21,6 @@ fun UsuarioResponse.toDomain(): Usuario = Usuario (
     rol = rol
 )
 
-
 fun Usuario.toEntity() = UsuarioEntity(
     id = id,
     userName = userName,
@@ -31,7 +29,8 @@ fun Usuario.toEntity() = UsuarioEntity(
     nombre = nombre,
     apellido = apellido,
     estadoUsuario = estadoUsuario,
-    rol = rol
+    rol = rol,
+    lastSync = System.currentTimeMillis(),
 )
 
 fun UsuarioEntity.toDomain() = Usuario(

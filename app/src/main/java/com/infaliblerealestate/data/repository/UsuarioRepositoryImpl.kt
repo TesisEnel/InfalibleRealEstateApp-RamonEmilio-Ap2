@@ -37,7 +37,7 @@ class UsuarioRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getUsuario(id: Int): Resource<Usuario?> {
+    override suspend fun getUsuario(id: String): Resource<Usuario?> {
         return when(val result = remoteDataSource.getUsuario(id)){
             is Resource.Success -> {
                 val usuario = result.data
@@ -50,7 +50,7 @@ class UsuarioRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun putUsuario(id: Int, usuario: Usuario): Resource<Usuario?> {
+    override suspend fun putUsuario(id: String, usuario: Usuario): Resource<Usuario?> {
         when(val result = remoteDataSource.putUsuario(id, usuario.toDto())){
             is Resource.Success -> {
                 val usuario = result.data
@@ -82,7 +82,7 @@ class UsuarioRepositoryImpl @Inject constructor(
             return Resource.Success(null)
         }
 
-        val result = remoteDataSource.getUsuario(id.toIntOrNull() ?: return Resource.Error("ID inválido"))
+        val result = remoteDataSource.getUsuario(id)
         return when(result) {
             is Resource.Success -> {
                 val usuario = result.data?.toDomain()

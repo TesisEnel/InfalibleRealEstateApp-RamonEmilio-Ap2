@@ -7,7 +7,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -30,16 +29,14 @@ import com.infaliblerealestate.presentation.util.navigation.Screen
 
 @Composable
 fun LoginScreen(
-    navController: NavController,
+    onNavigateToHome: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.id) {
-        state.id?.let { userId ->
-            navController.navigate(Screen.Home.createRoute(userId)) {
-                popUpTo(Screen.Login.route) { inclusive = true }
-            }
+        state.id?.let {
+            onNavigateToHome()
         }
     }
 

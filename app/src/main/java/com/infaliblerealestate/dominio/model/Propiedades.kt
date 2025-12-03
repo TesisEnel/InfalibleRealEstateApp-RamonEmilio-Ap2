@@ -2,6 +2,7 @@ package com.infaliblerealestate.dominio.model
 
 data class Propiedades(
     val propiedadId: Int,
+    val administradorId: String?,
     val titulo: String,
     val precio: Double,
     val moneda: String,

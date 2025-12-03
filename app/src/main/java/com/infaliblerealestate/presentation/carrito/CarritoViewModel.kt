@@ -1,8 +1,10 @@
 package com.infaliblerealestate.presentation.carrito
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infaliblerealestate.data.remote.Resource
+import com.infaliblerealestate.dominio.usecase.carrito.DeletePropiedadDeCarrito
 import com.infaliblerealestate.dominio.usecase.carrito.GetCarritoByIdUseCase
 import com.infaliblerealestate.dominio.usecase.propiedades.GetPropiedadUseCase
 import com.infaliblerealestate.dominio.usecase.usuarios.GetUsuarioActualUseCase
@@ -18,7 +20,8 @@ import javax.inject.Inject
 class CarritoViewModel @Inject constructor(
     private val getCarritoByIdUseCase: GetCarritoByIdUseCase,
     private val getUsuarioActualUseCase: GetUsuarioActualUseCase,
-    private val getPropiedadUseCase: GetPropiedadUseCase
+    private val getPropiedadUseCase: GetPropiedadUseCase,
+    private val deletePropiedadDeCarrito: DeletePropiedadDeCarrito
 ): ViewModel() {
     private val _state = MutableStateFlow(CarritoUiState())
     val state: StateFlow<CarritoUiState> = _state.asStateFlow()
@@ -31,6 +34,9 @@ class CarritoViewModel @Inject constructor(
         when (event) {
             is CarritoUiEvent.UserMessageShown -> {
                 _state.update { it.copy(userMessage = null) }
+            }
+            is CarritoUiEvent.DeletePropiedadDeCarrito -> {
+                deletePropiedadDeCarrito(event.propiedadId)
             }
             is CarritoUiEvent.LoadPropiedad -> {
                 loadPropiedad(event.id)
@@ -45,6 +51,17 @@ class CarritoViewModel @Inject constructor(
                     it.copy(showSheet = true)
                 }
             }
+            is CarritoUiEvent.LoadCarrito -> {
+                loadCarrito()
+            }
+
+            is CarritoUiEvent.SolicitarCompra -> {
+                prepararUrlWhatsapp()
+            }
+
+            is CarritoUiEvent.WhatsappLaunched -> {
+                _state.update { it.copy(whatsappUrl = null) }
+            }
         }
     }
 
@@ -53,7 +70,7 @@ class CarritoViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
 
             getUsuarioActualUseCase().collect { usuario ->
-                _state.update { it.copy(id = usuario?.id) }
+                _state.update { it.copy(usuarioId = usuario?.id) }
 
                 usuario?.id?.let { userId ->
                     when(val carrito = getCarritoByIdUseCase(userId)){
@@ -91,6 +108,44 @@ class CarritoViewModel @Inject constructor(
             }
         }
     }
+
+    fun deletePropiedadDeCarrito(propiedadId: Int){
+        viewModelScope.launch {
+
+            _state.update { it.copy(isLoading = true) }
+
+            _state.value.usuarioId.let {
+                when(val result = deletePropiedadDeCarrito(it!!, propiedadId)){
+                    is Resource.Success -> {
+                        _state.update { state ->
+                            state.copy(
+                                userMessage = "Propiedad eliminada del carrito",
+                            )
+                        }
+                        loadCarrito()
+                    }
+                    is Resource.Error -> {
+                        _state.update { state ->
+                            state.copy(
+                                isLoading = false,
+                                userMessage = "Error al eliminar la propiedad del carrito"
+                            )
+                        }
+                    }
+                    else -> {
+                        _state.update { state ->
+                            state.copy(
+                                isLoading = false,
+                                userMessage = "Error desconocido"
+                            )
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
 
     fun loadPropiedad(id: Int) {
         viewModelScope.launch {
@@ -131,6 +186,27 @@ class CarritoViewModel @Inject constructor(
 
 
         }
+    }
+
+    private fun prepararUrlWhatsapp() {
+        val items = _state.value.items
+        if (items.isEmpty()) return
+
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("Hola, estoy interesado en completar la compra de las siguientes propiedades que tengo en mi carrito:\n\n")
+
+        items.forEach { item ->
+            val titulo = item.propiedad.titulo ?: "Propiedad ${item.propiedad.ciudad}"
+            stringBuilder.append("- $titulo (ID: ${item.propiedad.propiedadId})\n")
+        }
+
+        stringBuilder.append("\nQuedo atento a su respuesta.")
+
+        val mensaje = Uri.encode(stringBuilder.toString())
+        val numero = "18098419551"
+        val url = "https://api.whatsapp.com/send?phone=$numero&text=$mensaje"
+
+        _state.update { it.copy(whatsappUrl = url) }
     }
 }
 
