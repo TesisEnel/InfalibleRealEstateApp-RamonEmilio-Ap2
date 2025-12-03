@@ -110,19 +110,20 @@ class CatalogoViewModel @Inject constructor(
     }
 
     private fun obtenerCategoriasSeleccionadas(): Set<Int> = buildSet {
-        val filtros = mapOf(
-            "casa" to _state.value.filtroCasa,
-            "apartamento" to _state.value.filtroDepartamento,
-            "villa" to _state.value.filtroVilla,
-            "penthouse" to _state.value.filtroPenthouse,
-            "terreno" to _state.value.filtroTerreno,
-            "local comercial" to _state.value.filtroLocalComercial
-        )
+        agregarSiActivo("casa", _state.value.filtroCasa)
+        agregarSiActivo("apartamento", _state.value.filtroDepartamento)
+        agregarSiActivo("villa", _state.value.filtroVilla)
+        agregarSiActivo("penthouse", _state.value.filtroPenthouse)
+        agregarSiActivo("terreno", _state.value.filtroTerreno)
+        agregarSiActivo("local comercial", _state.value.filtroLocalComercial)
+    }
 
-        filtros.forEach { (categoria, activo) ->
-            if (activo) categoriaIds[categoria]?.let { add(it) }
+    private fun MutableSet<Int>.agregarSiActivo(categoria: String, activo: Boolean) {
+        if (activo) {
+            categoriaIds[categoria]?.let { add(it) }
         }
     }
+
 
     fun getPropiedades() {
         viewModelScope.launch {
