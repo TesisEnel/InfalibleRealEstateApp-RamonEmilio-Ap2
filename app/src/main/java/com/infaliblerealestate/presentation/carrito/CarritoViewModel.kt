@@ -97,7 +97,7 @@ class CarritoViewModel @Inject constructor(
                             _state.update { state ->
                                 state.copy(
                                     isLoading = false,
-                                    userMessage = "Error desconocido"
+                                    userMessage = "Error al cargar el carrito"
                                 )
                             }
                         }
@@ -136,7 +136,7 @@ class CarritoViewModel @Inject constructor(
                         _state.update { state ->
                             state.copy(
                                 isLoading = false,
-                                userMessage = "Error desconocido"
+                                userMessage = "No se pudo eliminar la propiedad"
                             )
                         }
                     }
@@ -177,7 +177,7 @@ class CarritoViewModel @Inject constructor(
                     _state.update { state ->
                         state.copy(
                             isLoadingSheet = false,
-                            userMessage = "Error desconocido"
+                            userMessage = "No se pudo cargar la propiedad"
                         )
                     }
                 }
