@@ -30,8 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.infaliblerealestate.dominio.model.ImagenPropiedad
 import com.infaliblerealestate.dominio.model.Propiedades
+import com.infaliblerealestate.dominio.model.PropiedadesDetalle
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -150,4 +153,50 @@ fun PropiedadItem(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PropiedadItemPreview() {
+    val propiedadDemo = Propiedades(
+        propiedadId = 1,
+        administradorId = "admin-123",
+        titulo = "Apartamento moderno en el centro",
+        precio = 1_250_000.0,
+        moneda = "Peso",
+        ciudad = "Santo Domingo",
+        estadoProvincia = "Distrito Nacional",
+        tipoTransaccion = "Venta",
+        categoriaId = 1,
+        fechaPublicacion = "2025-01-01",
+        fechaActualizacion = "2025-01-10",
+        estadoPropiedadId = 1,
+        detalle = PropiedadesDetalle(
+            propiedadId = 1,
+            habitaciones = 3,
+            banos = 2.0,
+            metrosCuadrados = 120.0,
+            descripcion = "Amplio apartamento con excelente ubicación",
+            parqueo = 2
+        ),
+        imagenes = listOf(
+            ImagenPropiedad(
+                orden = 1,
+                imagenId = 45,
+                propiedadId = 1,
+                urlImagen = "https://via.placeholder.com/600x400",
+            ),
+            ImagenPropiedad(
+                orden = 2,
+                imagenId = 46,
+                propiedadId = 1,
+                urlImagen = "https://via.placeholder.com/600x400",
+            )
+        )
+    )
+
+    PropiedadItem(
+        propiedad = propiedadDemo,
+        showAdminOptions = true
+    )
 }
