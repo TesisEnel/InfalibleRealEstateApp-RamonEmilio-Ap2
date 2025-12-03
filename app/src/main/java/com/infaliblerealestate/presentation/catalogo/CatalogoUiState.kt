@@ -1,10 +1,13 @@
 package com.infaliblerealestate.presentation.catalogo
 
 import com.infaliblerealestate.dominio.model.Propiedades
+import com.infaliblerealestate.dominio.model.Usuario
 
 data class CatalogoUiState(
     val isLoading: Boolean = false,
     val infoMessage: String? = null,
+    val usuario: Usuario? = null,
+    val isAdmin: Boolean = false,
     val propiedades: List<Propiedades> = emptyList(),
     val propiedad: Propiedades? = null,
     val propiedadId: Int? = null,
